@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freedom Unit Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #30363d;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #e6edf3;
+            letter-spacing: 0.5px;
+        }
+
+        h1::before {
+            content: "★ ";
+            color: #b22234;
+        }
+
+        .subtitle {
+            font-size: 0.95em;
+            color: #8b949e;
+            font-style: italic;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            background: #161b22;
+            color: #8b949e;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-size: 0.9em;
+        }
+
+        .mode-btn:hover {
+            color: #e6edf3;
+            background: #0d419f;
+        }
+
+        .mode-btn.active {
+            border-color: #b22234;
+            color: #ffd700;
+            background: #1c1f26;
+        }
+
+        .mode-btn.active::after {
+            content: " ★";
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-label {
+            font-size: 0.85em;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 160px;
+            padding: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95em;
+            background: #0d1117;
+            color: #e6edf3;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #b22234;
+            box-shadow: 0 0 0 2px rgba(178, 34, 52, 0.1);
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.2s;
+        }
+
+        #convert-btn {
+            background: #b22234;
+            color: #fff;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        #convert-btn:hover {
+            background: #c92540;
+            box-shadow: 0 0 12px rgba(178, 34, 52, 0.3);
+        }
+
+        #convert-btn:active {
+            transform: scale(0.98);
+        }
+
+        #copy-btn {
+            background: #30363d;
+            color: #8b949e;
+            padding: 10px 20px;
+        }
+
+        #copy-btn:hover {
+            background: #3d444d;
+            color: #e6edf3;
+        }
+
+        #copy-btn.copied {
+            background: #238636;
+            color: #fff;
+        }
+
+        .output-section {
+            position: relative;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        #output {
+            width: 100%;
+            min-height: 160px;
+            padding: 15px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #e6edf3;
+            overflow: visible;
+            position: relative;
+        }
+
+        #output mark {
+            background: rgba(255, 215, 0, 0.15);
+            color: #ffd700;
+            border-bottom: 1px solid #ffd700;
+            padding: 0 2px;
+        }
+
+        .ambiguous-unit {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .ambig-text {
+            background: rgba(255, 165, 0, 0.1);
+            border-radius: 3px 0 0 3px;
+            padding: 2px 4px;
+            border: 1px dashed #ff9a56;
+            border-right: none;
+        }
+
+        .ambig-arrow {
+            background: rgba(255, 165, 0, 0.15);
+            border: 1px dashed #ff9a56;
+            border-left: none;
+            border-radius: 0 3px 3px 0;
+            padding: 2px 4px;
+            cursor: pointer;
+            color: #ff9a56;
+            font-size: 0.9em;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .ambig-arrow:hover {
+            background: rgba(255, 165, 0, 0.25);
+        }
+
+        .alt-menu {
+            position: absolute;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 6px 0;
+            z-index: 10000;
+            white-space: nowrap;
+            min-width: 220px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+            top: calc(100% + 6px);
+            left: 0;
+            display: none;
+        }
+
+        .alt-menu.open {
+            display: block;
+        }
+
+        .alt-unit {
+            background: transparent;
+            color: #e6edf3;
+            border: none;
+            padding: 8px 12px;
+            margin: 0;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-family: 'JetBrains Mono', monospace;
+            display: block;
+            width: 100%;
+            text-align: left;
+            transition: background 0.15s;
+        }
+
+        .alt-unit:hover {
+            background: #0d419f;
+            transform: none;
+        }
+
+        .alt-unit:first-child {
+            border-radius: 5px 5px 0 0;
+        }
+
+        .alt-unit:last-child {
+            border-radius: 0 0 5px 5px;
+        }
+
+        .examples {
+            margin-top: 40px;
+            padding: 20px;
+            background: #161b22;
+            border-left: 3px solid #b22234;
+            border-radius: 6px;
+        }
+
+        .examples h3 {
+            color: #b22234;
+            margin-bottom: 12px;
+            font-size: 0.95em;
+        }
+
+        .example-item {
+            margin-bottom: 12px;
+            font-size: 0.9em;
+        }
+
+        .example-item strong {
+            color: #ffd700;
+        }
+
+        .example-item em {
+            color: #8b949e;
+            display: block;
+            margin-top: 4px;
+        }
+
+        /* Admin Panel Styles */
+        #admin-trigger {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8b949e;
+            font-size: 0.7em;
+            transition: all 0.2s;
+            opacity: 0.3;
+            text-align: center;
+            padding: 4px;
+            line-height: 1.2;
+        }
+
+        #admin-trigger:hover {
+            opacity: 1;
+            border-color: #b22234;
+            color: #b22234;
+        }
+
+        .admin-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-overlay.active {
+            display: flex;
+        }
+
+        .admin-modal {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .admin-modal h2 {
+            color: #b22234;
+            margin-bottom: 20px;
+        }
+
+        .admin-modal input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .admin-modal input:focus {
+            outline: none;
+            border-color: #b22234;
+        }
+
+        .admin-modal button {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .admin-modal .close {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: #8b949e;
+        }
+
+        .admin-modal .close:hover {
+            color: #e6edf3;
+        }
+
+        .admin-error {
+            color: #ff7b72;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 123, 114, 0.1);
+            border-radius: 6px;
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 12px;
+        }
+
+        .admin-tab {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: #8b949e;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .admin-tab.active {
+            color: #ffd700;
+            border-bottom-color: #ffd700;
+        }
+
+        .admin-tab:hover {
+            color: #e6edf3;
+        }
+
+        .admin-content {
+            display: none;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .admin-content.active {
+            display: block;
+        }
+
+        .units-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85em;
+        }
+
+        .units-table th {
+            background: #161b22;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #30363d;
+            color: #8b949e;
+            font-weight: 600;
+        }
+
+        .units-table td {
+            padding: 10px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .units-table tr:hover {
+            background: #0d419f0a;
+        }
+
+        .unit-row-header {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .unit-row-header:hover {
+            color: #ffd700;
+        }
+
+        .unit-toggle {
+            display: inline-block;
+            width: 16px;
+            margin-right: 8px;
+        }
+
+        .unit-details {
+            display: none;
+            background: #0d1117;
+            padding: 12px;
+            margin: 8px 0;
+            border-left: 2px solid #b22234;
+            border-radius: 4px;
+        }
+
+        .unit-details.open {
+            display: block;
+        }
+
+        .replacement-item {
+            background: #161b22;
+            padding: 8px;
+            margin: 6px 0;
+            border-radius: 4px;
+            font-size: 0.8em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            color: #8b949e;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            color: #e6edf3;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .admin-button {
+            background: #0d419f;
+            color: #e6edf3;
+            border: 1px solid #1f6feb;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .admin-button:hover {
+            background: #388bfd;
+        }
+
+        .admin-button.danger {
+            background: #da3633;
+            border-color: #f85149;
+        }
+
+        .admin-button.danger:hover {
+            background: #f85149;
+        }
+
+        .admin-success {
+            color: #3fb950;
+            padding: 8px;
+            background: rgba(63, 185, 80, 0.1);
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .mode-selector {
+                gap: 8px;
+            }
+
+            .mode-btn {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+
+            textarea, #output {
+                font-size: 0.9em;
+                min-height: 120px;
+            }
+
+            #convert-btn {
+                min-width: 150px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .mode-btn {
+                padding: 5px 10px;
+                font-size: 0.75em;
+            }
+
+            textarea, #output {
+                min-height: 100px;
+            }
+
+            #admin-trigger {
+                bottom: 10px;
+                right: 10px;
+                width: 35px;
+                height: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>FREEDOM UNIT CONVERTER</h1>
+            <p class="subtitle">Dimensionally-consistent American measurement science since 2025</p>
+        </header>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="patriot">PATRIOT</button>
+            <button class="mode-btn" data-mode="texan">TEXAN</button>
+            <button class="mode-btn" data-mode="academic">ACADEMIC</button>
+            <button class="mode-btn" data-mode="apocalypse">APOCALYPSE</button>
+        </div>
+
+        <div class="section">
+            <div class="section-label">Input</div>
+            <textarea id="input" placeholder="Paste technical text here. Example: &#10;The impact face area was 0.1 sq inch at 10k psi, delivering 1,000 lb of force."></textarea>
+            <div class="button-row">
+                <button id="convert-btn">▶ Convert to Freedom Units</button>
+            </div>
+        </div>
+
+        <div class="section output-section">
+            <div class="output-header">
+                <div class="section-label">Output</div>
+                <button id="copy-btn">📋 Copy</button>
+            </div>
+            <div id="output">Output will appear here after conversion</div>
+        </div>
+
+        <div class="examples">
+            <h3>Examples to try:</h3>
+            <div class="example-item">
+                <strong>Engineering specs:</strong>
+                <em>"Assuming a strike face of 0.1 sq inch with 10k psi delivering 1,000 lb force."</em>
+            </div>
+            <div class="example-item">
+                <strong>Compound units:</strong>
+                <em>"Acceleration of 32 ft/s² over 5 miles at highway speed of 65 mph."</em>
+            </div>
+            <div class="example-item">
+                <strong>Mixed formats:</strong>
+                <em>"The tank holds approximately 500 gallons and weighs 5,000 lb when full."</em>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-overlay" id="adminOverlay">
+        <div class="admin-modal">
+            <span class="close" onclick="closeAdmin()">&times;</span>
+            <h2>FREEDOM CLEARANCE REQUIRED</h2>
+            <div id="admin-error" class="admin-error" style="display: none;"></div>
+            <input type="password" id="admin-password" placeholder="Enter authorization code">
+            <button onclick="checkAdminPassword()">UNLOCK</button>
+        </div>
+    </div>
+
+    <div class="admin-overlay" id="adminPanel" style="display: none; align-items: flex-start; padding-top: 20px;">
+        <div class="admin-modal" style="max-width: 900px; max-height: 85vh; width: 95%;">
+            <span class="close" onclick="closeAdmin()">&times;</span>
+            <h2>UNIT DICTIONARY ADMIN</h2>
+            <div id="admin-message" class="admin-success" style="display: none;"></div>
+
+            <div class="admin-tabs">
+                <button class="admin-tab active" onclick="switchAdminTab('units')">Units</button>
+                <button class="admin-tab" onclick="switchAdminTab('add')">Add Unit</button>
+                <button class="admin-tab" onclick="switchAdminTab('trade')">Import/Export</button>
+            </div>
+
+            <!-- UNITS TABLE TAB -->
+            <div id="units-tab" class="admin-content active">
+                <table class="units-table">
+                    <thead>
+                        <tr>
+                            <th>Canonical</th>
+                            <th>Dimension</th>
+                            <th>SI Value</th>
+                            <th>Aliases</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="units-tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- ADD UNIT TAB -->
+            <div id="add-tab" class="admin-content">
+                <h3>Create New Unit</h3>
+                <div class="form-group">
+                    <label>Canonical Key (e.g., FOOT):</label>
+                    <input type="text" id="new-canonical" placeholder="FOOT">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Dimension (LENGTH, MASS, VELOCITY, etc.):</label>
+                        <select id="new-dimension">
+                            <option>LENGTH</option>
+                            <option>AREA</option>
+                            <option>VOLUME</option>
+                            <option>MASS</option>
+                            <option>FORCE</option>
+                            <option>PRESSURE</option>
+                            <option>VELOCITY</option>
+                            <option>ACCELERATION</option>
+                            <option>TORQUE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>SI Base Value:</label>
+                        <input type="number" id="new-si" placeholder="0.3048" step="any">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Aliases (comma-separated):</label>
+                    <input type="text" id="new-aliases" placeholder="ft, foot, feet, '">
+                </div>
+                <button class="admin-button" onclick="createNewUnit()">Create Unit</button>
+            </div>
+
+            <!-- IMPORT/EXPORT TAB -->
+            <div id="trade-tab" class="admin-content">
+                <h3>Backup & Restore</h3>
+                <div style="margin-bottom: 20px;">
+                    <button class="admin-button" onclick="exportDictionary()">📥 Export Dictionary as JSON</button>
+                    <p style="font-size: 0.85em; color: #8b949e; margin-top: 8px;">Download your unit dictionary for backup or sharing</p>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="import-file" style="display: block; margin-bottom: 8px; color: #8b949e; font-weight: 600;">Import Dictionary from JSON:</label>
+                    <input type="file" id="import-file" accept=".json" style="background: #161b22; border: 1px dashed #30363d; padding: 12px; border-radius: 4px; cursor: pointer;">
+                    <button class="admin-button" onclick="importDictionary()" style="margin-top: 8px;">📤 Import JSON</button>
+                </div>
+                <div>
+                    <button class="admin-button danger" onclick="resetToDefaults()">⚠️ Reset to Factory Defaults</button>
+                    <p style="font-size: 0.85em; color: #ff7b72; margin-top: 8px;">This will delete all custom units and restore the original dictionary</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="admin-trigger" title="Admin">📡</button>
+
+    <script>
+        // =====================================================
+        // UNIT DICTIONARY — Factory Defaults
+        // =====================================================
+
+        const UNIT_DICT = [
+            // ==================== LENGTH ====================
+            {
+                canonical: 'INCH',
+                SI: 0.0254,
+                dimension: 'LENGTH',
+                aliases: ['in', 'inch', 'inches', '"'],
+                replacements: {
+                    patriot: [
+                        { singular: 'LEGO stud', plural: 'LEGO studs', SI: 0.0080, weight: 3, note: 'Exactly 8mm pitch' },
+                        { singular: 'sauce packet length', plural: 'sauce packet lengths', SI: 0.09525, weight: 2, note: '~3.75in Taco Bell packet' },
+                        { singular: 'bullet', plural: 'bullets', SI: 0.0322, weight: 1, note: '.308 cartridge ~1.27in' }
+                    ],
+                    texan: [
+                        { singular: 'Longhorn horn tip spacing', plural: 'Longhorn horn tip spacings', SI: 0.2286, weight: 2, note: '~9 inch horn span' },
+                        { singular: 'oil derrick segment', plural: 'oil derrick segments', SI: 0.3048, weight: 1, note: '~12 inch section' }
+                    ],
+                    academic: [
+                        { singular: 'FSU (Freedom Standard Unit)', plural: 'FSU', SI: 0.0254, weight: 3, note: 'Base unit' },
+                        { singular: 'microFSU', plural: 'microFSU', SI: 0.0000254, weight: 1, note: '10⁻⁶ FSU' }
+                    ],
+                    apocalypse: [
+                        { singular: '9mm bullet', plural: '9mm bullets', SI: 0.00955, weight: 2, note: 'Standard ammo reference' },
+                        { singular: 'MRE packet width', plural: 'MRE packet widths', SI: 0.0762, weight: 1, note: '3 inch meal packet' }
+                    ]
+                }
+            },
+            {
+                canonical: 'FOOT',
+                SI: 0.3048,
+                dimension: 'LENGTH',
+                aliases: ['ft', 'foot', 'feet', "'"],
+                replacements: {
+                    patriot: [
+                        { singular: 'Subway Footlong', plural: 'Subway Footlongs', SI: 0.2921, weight: 3, note: 'Empirically ~11.5 in' },
+                        { singular: 'dollar bill', plural: 'dollar bills', SI: 0.1560, weight: 2, note: '6.14 in USSC spec' },
+                        { singular: 'AR-15 length', plural: 'AR-15 lengths', SI: 0.8319, weight: 1, note: '16\\" barrel, collapsed ~32.75 in' }
+                    ],
+                    texan: [
+                        { singular: 'Longhorn horn length', plural: 'Longhorn horn lengths', SI: 1.8288, weight: 3, note: '~6 ft tip to tip' },
+                        { singular: 'oil barrel height', plural: 'oil barrel heights', SI: 0.8636, weight: 2, note: '42 gallon drum ~34 in' }
+                    ],
+                    academic: [
+                        { singular: 'FSUL (Freedom Standard Unit Length)', plural: 'FSUL', SI: 0.3048, weight: 3, note: 'Base foot unit' },
+                        { singular: 'deci-FSUL', plural: 'deci-FSUL', SI: 0.03048, weight: 1, note: '10⁻¹ FSUL' }
+                    ],
+                    apocalypse: [
+                        { singular: 'AK-47 length', plural: 'AK-47 lengths', SI: 0.8764, weight: 2, note: '~34.6 in unfolded' },
+                        { singular: 'MRE box height', plural: 'MRE box heights', SI: 0.2032, weight: 1, note: '8 in meal box' }
+                    ]
+                }
+            },
+            {
+                canonical: 'YARD',
+                SI: 0.9144,
+                dimension: 'LENGTH',
+                aliases: ['yd', 'yard', 'yards'],
+                replacements: {
+                    patriot: [
+                        { singular: 'NFL rule book page', plural: 'NFL rule book pages', SI: 0.2794, weight: 2, note: '11 in approx page' },
+                        { singular: 'from FOOT × 3', plural: '(3× FOOT replacements)', SI: 0.3048, weight: 0 }
+                    ],
+                    texan: [
+                        { singular: 'Texas branding iron length', plural: 'Texas branding iron lengths', SI: 0.9144, weight: 2, note: 'Exactly 1 yard' }
+                    ],
+                    academic: [
+                        { singular: 'FSUY', plural: 'FSUY', SI: 0.9144, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'fallout shelter door width', plural: 'fallout shelter door widths', SI: 0.9144, weight: 2, note: 'Standard 3ft' }
+                    ]
+                }
+            },
+            {
+                canonical: 'MILE',
+                SI: 1609.34,
+                dimension: 'LENGTH',
+                aliases: ['mi', 'mile', 'miles'],
+                replacements: {
+                    patriot: [
+                        { singular: 'football field', plural: 'football fields', SI: 91.44, weight: 3, note: 'Exact 100 yd' },
+                        { singular: 'Walmart parking lot', plural: 'Walmart parking lots', SI: 243.84, weight: 2, note: '~800 ft typical Supercenter' }
+                    ],
+                    texan: [
+                        { singular: 'Dallas to Fort Worth highway', plural: 'Dallas to Fort Worth highways', SI: 51219, weight: 1, note: '~32 mi DFW stretch' },
+                        { singular: 'oil rig spacing', plural: 'oil rig spacings', SI: 1600, weight: 2, note: '~1 km standard spacing' }
+                    ],
+                    academic: [
+                        { singular: 'FSUMI', plural: 'FSUMI', SI: 1609.34, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'fallout zone radius', plural: 'fallout zone radii', SI: 1600, weight: 2, note: 'Evacuation perimeter' }
+                    ]
+                }
+            },
+            {
+                canonical: 'METER',
+                SI: 1.0,
+                dimension: 'LENGTH',
+                aliases: ['m', 'meter', 'metre', 'meters', 'metres'],
+                replacements: {
+                    patriot: [
+                        { singular: 'golf club', plural: 'golf clubs', SI: 0.9398, weight: 2, note: '37 in avg iron' },
+                        { singular: 'baseball bat', plural: 'baseball bats', SI: 0.8382, weight: 2, note: '33 in Louisville Slugger' }
+                    ],
+                    texan: [
+                        { singular: 'Texas boot heel', plural: 'Texas boot heels', SI: 0.3048, weight: 1, note: '1 ft approx' },
+                        { singular: 'oil pipeline section', plural: 'oil pipeline sections', SI: 1.2192, weight: 2, note: '4 ft section' }
+                    ],
+                    academic: [
+                        { singular: 'm (SI)', plural: 'm', SI: 1.0, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'bunker depth', plural: 'bunker depths', SI: 2.0, weight: 1, note: '~6.5 ft deep' }
+                    ]
+                }
+            },
+            {
+                canonical: 'KILOMETER',
+                SI: 1000,
+                dimension: 'LENGTH',
+                aliases: ['km', 'kilometer', 'kilometre'],
+                replacements: {
+                    patriot: [
+                        { singular: 'Daytona 500 lap', plural: 'Daytona 500 laps', SI: 4023.36, weight: 2, note: '2.5 mi per lap' },
+                        { singular: 'NASCAR race loop', plural: 'NASCAR race loops', SI: 4828.03, weight: 1, note: '3 mi standard' }
+                    ],
+                    texan: [
+                        { singular: 'Texas oil field zone', plural: 'Texas oil field zones', SI: 1600, weight: 2, note: '~1 km' },
+                        { singular: 'BBQ competition course', plural: 'BBQ competition courses', SI: 1000, weight: 1, note: 'Exactly 1 km' }
+                    ],
+                    academic: [
+                        { singular: 'km (SI)', plural: 'km', SI: 1000, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'fallout zone perimeter', plural: 'fallout zone perimeters', SI: 3141.6, weight: 2, note: '~1 km radius circle' }
+                    ]
+                }
+            },
+
+            // ==================== AREA ====================
+            {
+                canonical: 'SQ_INCH',
+                SI: 6.4516e-4,
+                dimension: 'AREA',
+                aliases: ['sq in', 'sq inch', 'in²', 'square inch', 'square inches'],
+                replacements: {
+                    patriot: [
+                        { singular: 'postage stamp', plural: 'postage stamps', SI: 5.5e-4, weight: 3, note: 'Forever stamp 0.87×0.98 in' },
+                        { singular: 'sauce packet face', plural: 'sauce packet faces', SI: 3.629e-3, weight: 2, note: 'Taco Bell ~5.625 in²' }
+                    ],
+                    texan: [
+                        { singular: 'oil drop', plural: 'oil drops', SI: 6.4516e-5, weight: 1, note: '1/10 sq in' }
+                    ],
+                    academic: [
+                        { singular: 'FSUA (Freedom Area)', plural: 'FSUA', SI: 6.4516e-4, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: '5.56 NATO bullet hole', plural: '5.56 NATO bullet holes', SI: 1.6e-4, weight: 1, note: 'Approximate' }
+                    ]
+                }
+            },
+            {
+                canonical: 'SQ_FOOT',
+                SI: 9.2903e-2,
+                dimension: 'AREA',
+                aliases: ['sq ft', 'sq foot', 'ft²', 'square foot', 'square feet'],
+                replacements: {
+                    patriot: [
+                        { singular: 'cheeseburger wrapper', plural: 'cheeseburger wrappers', SI: 9.2903e-2, weight: 3, note: 'Exactly 12×12 in' },
+                        { singular: 'pizza box top', plural: 'pizza box tops', SI: 1.6516e-1, weight: 2, note: '16×16 in box' },
+                        { singular: 'flag (3×5 ft)', plural: 'flags (3×5 ft)', SI: 1.3935, weight: 1, note: 'American flag area' }
+                    ],
+                    texan: [
+                        { singular: 'Texas license plate', plural: 'Texas license plates', SI: 4.1548e-2, weight: 2, note: '12×6 in plate' },
+                        { singular: 'oil barrel footprint', plural: 'oil barrel footprints', SI: 0.8361, weight: 1, note: '~3 ft diameter' }
+                    ],
+                    academic: [
+                        { singular: 'FSUA-ft (Area)', plural: 'FSUA', SI: 9.2903e-2, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'MRE box surface', plural: 'MRE box surfaces', SI: 0.092, weight: 2, note: 'Meal box top' }
+                    ]
+                }
+            },
+            {
+                canonical: 'SQ_YARD',
+                SI: 0.8361,
+                dimension: 'AREA',
+                aliases: ['sq yd', 'sq yard', 'yd²', 'square yard'],
+                replacements: {
+                    patriot: [
+                        { singular: 'twin mattress', plural: 'twin mattresses', SI: 1.8394, weight: 2, note: '38×75 in = 2.64 sq yd' }
+                    ],
+                    texan: [
+                        { singular: 'Texas plot', plural: 'Texas plots', SI: 0.8361, weight: 2, note: 'Exactly 1 sq yd' }
+                    ],
+                    academic: [
+                        { singular: 'FSUA-yd', plural: 'FSUA', SI: 0.8361, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'bunker floor panel', plural: 'bunker floor panels', SI: 0.8361, weight: 2, note: '~1 sq yd panel' }
+                    ]
+                }
+            },
+            {
+                canonical: 'SQ_MILE',
+                SI: 2.58999e6,
+                dimension: 'AREA',
+                aliases: ['sq mi', 'sq mile', 'mi²', 'square mile'],
+                replacements: {
+                    patriot: [
+                        { singular: 'Walmart Supercenter', plural: 'Walmart Supercenters', SI: 1.6908e4, weight: 3, note: '182k sq ft store' },
+                        { singular: 'Manhattan', plural: 'Manhattans', SI: 5.94e7, weight: 1, note: '~23 sq mi' }
+                    ],
+                    texan: [
+                        { singular: 'Texas ranch acre cluster', plural: 'Texas ranch acre clusters', SI: 4046.86, weight: 2, note: '~1 acre' },
+                        { singular: 'Dallas-Fort Worth sprawl', plural: 'Dallas-Fort Worth sprawls', SI: 2.6e7, weight: 1, note: '~10 sq mi DFW proper' }
+                    ],
+                    academic: [
+                        { singular: 'FSUA-mi', plural: 'FSUA', SI: 2.58999e6, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'fallout exclusion zone', plural: 'fallout exclusion zones', SI: 7.8539e6, weight: 2, note: '~3 sq mi radius' }
+                    ]
+                }
+            },
+            {
+                canonical: 'SQ_METER',
+                SI: 1.0,
+                dimension: 'AREA',
+                aliases: ['m²', 'sq m', 'sq meter', 'square meter'],
+                replacements: {
+                    patriot: [
+                        { singular: 'king-size mattress', plural: 'king-size mattresses', SI: 0.6064, weight: 2, note: '76×80 in = 0.6064 m²' }
+                    ],
+                    texan: [
+                        { singular: 'oil rig landing pad', plural: 'oil rig landing pads', SI: 1.0, weight: 2, note: 'Exactly 1 m²' }
+                    ],
+                    academic: [
+                        { singular: 'm² (SI)', plural: 'm²', SI: 1.0, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'fallout decontamination zone', plural: 'fallout decontamination zones', SI: 1.0, weight: 2, note: 'Unit decon area' }
+                    ]
+                }
+            },
+
+            // ==================== VOLUME ====================
+            {
+                canonical: 'FL_OZ',
+                SI: 2.9574e-5,
+                dimension: 'VOLUME',
+                aliases: ['fl oz', 'fluid oz', 'floz'],
+                replacements: {
+                    patriot: [
+                        { singular: 'shot of whiskey', plural: 'shots of whiskey', SI: 4.4361e-5, weight: 3, note: '1.5 fl oz legal shot' },
+                        { singular: 'tablespoon', plural: 'tablespoons', SI: 1.4787e-5, weight: 2, note: '0.5 fl oz' }
+                    ],
+                    texan: [
+                        { singular: 'Texas shot glass', plural: 'Texas shot glasses', SI: 5.914e-5, weight: 2, note: '2 fl oz shot' }
+                    ],
+                    academic: [
+                        { singular: 'FSUVOL-fl', plural: 'FSUVOL', SI: 2.9574e-5, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'water purification tablet serving', plural: 'water purification tablet servings', SI: 1.48e-5, weight: 1, note: '0.5 fl oz dose' }
+                    ]
+                }
+            },
+            {
+                canonical: 'CUP',
+                SI: 2.3659e-4,
+                dimension: 'VOLUME',
+                aliases: ['cup', 'cups'],
+                replacements: {
+                    patriot: [
+                        { singular: 'Solo cup', plural: 'Solo cups', SI: 4.7318e-4, weight: 3, note: 'Exactly 16 oz = 473 mL' },
+                        { singular: 'coffee mug', plural: 'coffee mugs', SI: 2.95e-4, weight: 2, note: '10 fl oz mug' }
+                    ],
+                    texan: [
+                        { singular: 'Texas-sized cup', plural: 'Texas-sized cups', SI: 5.9147e-4, weight: 2, note: '20 fl oz Supercup' }
+                    ],
+                    academic: [
+                        { singular: 'FSUVOL-cup', plural: 'FSUVOL', SI: 2.3659e-4, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'MRE drink packet', plural: 'MRE drink packets', SI: 2.3659e-4, weight: 2, note: 'Powdered drink mix' }
+                    ]
+                }
+            },
+            {
+                canonical: 'PINT',
+                SI: 4.7318e-4,
+                dimension: 'VOLUME',
+                aliases: ['pt', 'pint', 'pints'],
+                replacements: {
+                    patriot: [
+                        { singular: 'tall boy beer can', plural: 'tall boy beer cans', SI: 4.7318e-4, weight: 3, note: 'Exactly 16 oz' },
+                        { singular: 'pint glass', plural: 'pint glasses', SI: 4.7318e-4, weight: 2, note: 'Exactly 1 pint' }
+                    ],
+                    texan: [
+                        { singular: 'Texas beer stein', plural: 'Texas beer steins', SI: 5.9147e-4, weight: 2, note: '20 oz' }
+                    ],
+                    academic: [
+                        { singular: 'FSUVOL-pt', plural: 'FSUVOL', SI: 4.7318e-4, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'water ration canteen', plural: 'water ration canteens', SI: 4.7318e-4, weight: 2, note: 'Standard issue' }
+                    ]
+                }
+            },
+            {
+                canonical: 'QUART',
+                SI: 9.4635e-4,
+                dimension: 'VOLUME',
+                aliases: ['qt', 'quart', 'quarts'],
+                replacements: {
+                    patriot: [
+                        { singular: 'Nalgene 32 oz', plural: 'Nalgene 32 oz bottles', SI: 9.4635e-4, weight: 3, note: 'Exactly 1 quart' },
+                        { singular: 'water bottle', plural: 'water bottles', SI: 5.9147e-4, weight: 2, note: '20 fl oz bottle' }
+                    ],
+                    texan: [
+                        { singular: 'Texas ranch water jug', plural: 'Texas ranch water jugs', SI: 9.4635e-4, weight: 2, note: '32 oz exactly' }
+                    ],
+                    academic: [
+                        { singular: 'FSUVOL-qt', plural: 'FSUVOL', SI: 9.4635e-4, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'fallout shelter water ration', plural: 'fallout shelter water rations', SI: 9.4635e-4, weight: 2, note: 'Daily ration' }
+                    ]
+                }
+            },
+            {
+                canonical: 'GALLON',
+                SI: 3.78541e-3,
+                dimension: 'VOLUME',
+                aliases: ['gal', 'gallon', 'gallons'],
+                replacements: {
+                    patriot: [
+                        { singular: 'Big Gulp', plural: 'Big Gulps', SI: 1.89271e-3, weight: 3, note: 'Exactly 64 oz = 2 qt' },
+                        { singular: 'Solo cup', plural: 'Solo cups (8 per gallon)', SI: 4.7318e-4, weight: 2, note: '1 gallon = 8 Solo cups' },
+                        { singular: 'kiddie pool gallon', plural: 'kiddie pool gallons', SI: 0.5678, weight: 1, note: 'Typical pool ≈ 100 gal' }
+                    ],
+                    texan: [
+                        { singular: 'Texas oil barrel shot', plural: 'Texas oil barrel shots', SI: 0.1592, weight: 2, note: '42 gallon barrel' },
+                        { singular: 'Big Gulp XL', plural: 'Big Gulp XLs', SI: 3.78541e-3, weight: 2, note: 'Exactly 1 gallon' }
+                    ],
+                    academic: [
+                        { singular: 'FSUVOL-gal', plural: 'FSUVOL', SI: 3.78541e-3, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'emergency water jerry can', plural: 'emergency water jerry cans', SI: 3.78541e-3, weight: 3, note: 'Standard 5-gallon jug' }
+                    ]
+                }
+            },
+            {
+                canonical: 'LITER',
+                SI: 1.0e-3,
+                dimension: 'VOLUME',
+                aliases: ['L', 'l', 'liter', 'litre'],
+                replacements: {
+                    patriot: [
+                        { singular: 'standard water bottle', plural: 'standard water bottles', SI: 5.0e-4, weight: 3, note: '16.9 fl oz' },
+                        { singular: '2-liter soda bottle', plural: '2-liter soda bottles', SI: 2.0e-3, weight: 2, note: 'Common soda size' }
+                    ],
+                    texan: [
+                        { singular: 'Texas hydration bottle', plural: 'Texas hydration bottles', SI: 1.0e-3, weight: 2, note: 'Exactly 1 liter' }
+                    ],
+                    academic: [
+                        { singular: 'L (SI)', plural: 'L', SI: 1.0e-3, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'radiation counting vessel', plural: 'radiation counting vessels', SI: 1.0e-3, weight: 2, note: '1 liter measurement' }
+                    ]
+                }
+            },
+            {
+                canonical: 'CU_INCH',
+                SI: 1.63871e-5,
+                dimension: 'VOLUME',
+                aliases: ['cu in', 'in³', 'cubic inch'],
+                replacements: {
+                    patriot: [
+                        { singular: 'mini whiskey bottle', plural: 'mini whiskey bottles', SI: 5.0e-5, weight: 2, note: '50 mL airline' },
+                        { singular: '.45 ACP bullet', plural: '.45 ACP bullets', SI: 5.39e-6, weight: 1, note: '~8.3 cu in per round' }
+                    ],
+                    texan: [
+                        { singular: 'bullet casing', plural: 'bullet casings', SI: 1.63871e-5, weight: 2, note: 'Standard .308' }
+                    ],
+                    academic: [
+                        { singular: 'FSUVOL-in³', plural: 'FSUVOL', SI: 1.63871e-5, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'radioactive sample vial', plural: 'radioactive sample vials', SI: 1.63871e-5, weight: 2, note: 'Small specimen' }
+                    ]
+                }
+            },
+            {
+                canonical: 'CU_FOOT',
+                SI: 2.8317e-2,
+                dimension: 'VOLUME',
+                aliases: ['cu ft', 'ft³', 'cubic foot'],
+                replacements: {
+                    patriot: [
+                        { singular: 'dorm mini-fridge', plural: 'dorm mini-fridges', SI: 5.6634e-2, weight: 3, note: 'Typically 2 cu ft' },
+                        { singular: '30-pack beer cooler', plural: '30-pack beer coolers', SI: 4.2475e-2, weight: 2, note: 'Typical ~1.5 cu ft' }
+                    ],
+                    texan: [
+                        { singular: 'Texas cooler cubic', plural: 'Texas cooler cubics', SI: 2.8317e-2, weight: 2, note: 'Exactly 1 cu ft' },
+                        { singular: 'BBQ smoker chamber', plural: 'BBQ smoker chambers', SI: 0.28317, weight: 1, note: '~10 cu ft typical' }
+                    ],
+                    academic: [
+                        { singular: 'FSUVOL-ft³', plural: 'FSUVOL', SI: 2.8317e-2, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'fallout bunker air volume', plural: 'fallout bunker air volumes', SI: 2.8317e-2, weight: 2, note: 'Per cubic foot' }
+                    ]
+                }
+            },
+
+            // ==================== MASS ====================
+            {
+                canonical: 'GRAM',
+                SI: 0.001,
+                dimension: 'MASS',
+                aliases: ['gram', 'grams'],
+                replacements: {
+                    patriot: [
+                        { singular: 'M&M candy', plural: 'M&M candies', SI: 8.5e-4, weight: 3, note: '~0.85g per M&M' },
+                        { singular: 'Skittle', plural: 'Skittles', SI: 1.1e-3, weight: 2, note: '~1.1g per Skittle' },
+                        { singular: 'paper clip', plural: 'paper clips', SI: 1.0e-3, weight: 1, note: 'Exactly ~1g' }
+                    ],
+                    texan: [
+                        { singular: 'Texas peppercorn', plural: 'Texas peppercorns', SI: 5.0e-4, weight: 1, note: '~0.5g' }
+                    ],
+                    academic: [
+                        { singular: 'g (SI)', plural: 'g', SI: 0.001, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: '5.56 bullet round', plural: '5.56 bullet rounds', SI: 3.9e-3, weight: 2, note: '~3.9g per round' }
+                    ]
+                }
+            },
+            {
+                canonical: 'OUNCE',
+                SI: 2.8350e-2,
+                dimension: 'MASS',
+                aliases: ['oz', 'ounce', 'ounces'],
+                replacements: {
+                    patriot: [
+                        { singular: 'ketchup packet', plural: 'ketchup packets', SI: 1.2474e-2, weight: 3, note: '0.44 oz Heinz' },
+                        { singular: 'pencil', plural: 'pencils', SI: 5.67e-3, weight: 2, note: '~0.2 oz' },
+                        { singular: 'dime', plural: 'dimes', SI: 2.268e-3, weight: 1, note: '~0.08 oz' }
+                    ],
+                    texan: [
+                        { singular: 'Texas jalapeño', plural: 'Texas jalapeños', SI: 2.5e-3, weight: 2, note: '~0.09 oz per pepper' }
+                    ],
+                    academic: [
+                        { singular: 'oz (avoirdupois)', plural: 'oz', SI: 2.8350e-2, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: '.308 bullet', plural: '.308 bullets', SI: 1.0803e-2, weight: 2, note: '~168 grain round' }
+                    ]
+                }
+            },
+            {
+                canonical: 'POUND',
+                SI: 0.45359,
+                dimension: 'MASS',
+                aliases: ['lb', 'lbs', 'pound', 'pounds'],
+                replacements: {
+                    patriot: [
+                        { singular: 'Big Mac', plural: 'Big Macs', SI: 0.21944, weight: 3, note: '219g / 7.72oz McDonald\'s' },
+                        { singular: 'stick of butter', plural: 'sticks of butter', SI: 0.11340, weight: 2, note: 'Exactly 4 oz = 0.25 lb' },
+                        { singular: 'can of soup', plural: 'cans of soup', SI: 0.42524, weight: 2, note: '~15 oz Campbell\'s' },
+                        { singular: 'brick of cheese', plural: 'bricks of cheese', SI: 0.2268, weight: 1, note: '~8 oz block' }
+                    ],
+                    texan: [
+                        { singular: 'Texas steak', plural: 'Texas steaks', SI: 0.45359, weight: 2, note: 'Exactly 1 lb ribeye' },
+                        { singular: 'BBQ brisket portion', plural: 'BBQ brisket portions', SI: 0.3175, weight: 1, note: '~7 oz serving' }
+                    ],
+                    academic: [
+                        { singular: 'lb (avoirdupois)', plural: 'lb', SI: 0.45359, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'MRE meal', plural: 'MRE meals', SI: 0.68039, weight: 3, note: '~1.5 lb packaged meal' },
+                        { singular: 'survival ration pack', plural: 'survival ration packs', SI: 0.45359, weight: 2, note: 'Standard 1 lb emergency ration' }
+                    ]
+                }
+            },
+            {
+                canonical: 'TON',
+                SI: 907.185,
+                dimension: 'MASS',
+                aliases: ['ton', 'tons', 'ton (short)'],
+                replacements: {
+                    patriot: [
+                        { singular: 'Ford F-150', plural: 'Ford F-150s', SI: 1823.7, weight: 3, note: 'Base 2023 F-150 ~4,021 lb' },
+                        { singular: 'full-size SUV', plural: 'full-size SUVs', SI: 2267.96, weight: 2, note: 'Chevy Tahoe ~5,000 lb' }
+                    ],
+                    texan: [
+                        { singular: 'Texas oil truck', plural: 'Texas oil trucks', SI: 907.185, weight: 2, note: 'Exactly 1 short ton' },
+                        { singular: 'longhorn steer', plural: 'longhorn steers', SI: 907.185, weight: 1, note: 'Adult steer ~1 ton' }
+                    ],
+                    academic: [
+                        { singular: 'ton (US)', plural: 'ton', SI: 907.185, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'fallout shelter steel structure', plural: 'fallout shelter steel structures', SI: 907.185, weight: 2, note: 'Structural unit' }
+                    ]
+                }
+            },
+            {
+                canonical: 'KILOGRAM',
+                SI: 1.0,
+                dimension: 'MASS',
+                aliases: ['kg', 'kilogram', 'kilograms'],
+                replacements: {
+                    patriot: [
+                        { singular: 'bag of Doritos', plural: 'bags of Doritos', SI: 0.36855, weight: 2, note: 'Party size 13oz' },
+                        { singular: 'bag of flour', plural: 'bags of flour', SI: 2.27, weight: 1, note: '5 lb flour bag' }
+                    ],
+                    texan: [
+                        { singular: 'Texas chili pot filling', plural: 'Texas chili pot fillings', SI: 1.0, weight: 2, note: 'Exactly 1 kg' }
+                    ],
+                    academic: [
+                        { singular: 'kg (SI)', plural: 'kg', SI: 1.0, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'MRE case', plural: 'MRE cases', SI: 5.0, weight: 2, note: '~12 meals per case, ~5kg' }
+                    ]
+                }
+            },
+
+            // ==================== TORQUE ====================
+            {
+                canonical: 'LB_FT_TORQUE',
+                SI: 1.35582,
+                dimension: 'TORQUE',
+                aliases: ['lb-ft', 'lb ft', 'pound-feet', 'pound feet', 'lbf-ft'],
+                replacements: {
+                    patriot: [
+                        { singular: 'Big Mac-Subway Footlong', plural: 'Big Mac-Subway Footlongs', SI: 0.2974, weight: 3, note: 'Force × length' },
+                        { singular: 'refrigerator magnet-dollar bill', plural: 'refrigerator magnet-dollar bills', SI: 0.6766, weight: 2, note: 'Magnet force × bill length' }
+                    ],
+                    texan: [
+                        { singular: 'Texas twister', plural: 'Texas twisters', SI: 1.35582, weight: 2, note: 'Exactly 1 lb-ft' }
+                    ],
+                    academic: [
+                        { singular: 'lb·ft', plural: 'lb·ft', SI: 1.35582, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'MRE-can spin', plural: 'MRE-can spins', SI: 1.35582, weight: 2, note: 'Meal can rotational force' }
+                    ]
+                }
+            },
+            {
+                canonical: 'NEWTON_METER_TORQUE',
+                SI: 1.0,
+                dimension: 'TORQUE',
+                aliases: ['n-m', 'n·m', 'nm', 'newton-meter', 'newton-metre'],
+                replacements: {
+                    patriot: [
+                        { singular: 'LEGO stud-meter', plural: 'LEGO stud-meters', SI: 0.0080, weight: 1, note: 'Stud pitch × meter' }
+                    ],
+                    texan: [
+                        { singular: 'Texas torque unit', plural: 'Texas torque units', SI: 1.0, weight: 2, note: 'Exactly 1 N·m' }
+                    ],
+                    academic: [
+                        { singular: 'N·m', plural: 'N·m', SI: 1.0, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'fallout twist', plural: 'fallout twists', SI: 1.0, weight: 1, note: 'Rotational force' }
+                    ]
+                }
+            },
+
+            // ==================== FORCE ====================
+            {
+                canonical: 'POUND_FORCE',
+                SI: 4.44822,
+                dimension: 'FORCE',
+                aliases: ['lbf', 'lb force', 'pounds of force'],
+                replacements: {
+                    patriot: [
+                        { singular: 'refrigerator magnet', plural: 'refrigerator magnets', SI: 4.44822, weight: 3, note: '~1 lb hold force' },
+                        { singular: 'Big Mac of force', plural: 'Big Macs of force', SI: 2.14817, weight: 2, note: 'Weight of one Big Mac' }
+                    ],
+                    texan: [
+                        { singular: 'Texas iron grip', plural: 'Texas iron grips', SI: 4.44822, weight: 2, note: 'Exactly 1 lbf' }
+                    ],
+                    academic: [
+                        { singular: 'lbf (US)', plural: 'lbf', SI: 4.44822, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: '.308 round impact', plural: '.308 round impacts', SI: 890, weight: 1, note: '~200 lbf per round' }
+                    ]
+                }
+            },
+            {
+                canonical: 'NEWTON',
+                SI: 1.0,
+                dimension: 'FORCE',
+                aliases: ['N', 'newton', 'newtons'],
+                replacements: {
+                    patriot: [
+                        { singular: 'ketchup packet force', plural: 'ketchup packet forces', SI: 0.12228, weight: 2, note: 'Weight of 0.44 oz packet' }
+                    ],
+                    texan: [
+                        { singular: 'Texas force unit', plural: 'Texas force units', SI: 1.0, weight: 2, note: 'Exactly 1 Newton' }
+                    ],
+                    academic: [
+                        { singular: 'N (SI)', plural: 'N', SI: 1.0, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'blast force unit', plural: 'blast force units', SI: 1.0, weight: 2, note: 'Per Newton' }
+                    ]
+                }
+            },
+
+            // ==================== PRESSURE ====================
+            {
+                canonical: 'PSI',
+                SI: 6894.76,
+                dimension: 'PRESSURE',
+                aliases: ['psi', 'lb/in²', 'lbf/in²'],
+                replacements: {
+                    patriot: [
+                        { singular: 'pounds per postage stamp', plural: 'pounds per postage stamp', SI: 7476, weight: 3, note: 'lbf / 0.8526 in²' },
+                        { singular: 'Big Mac per postage stamp', plural: 'Big Macs per postage stamp', SI: 1614, weight: 2, note: 'Compound unit' }
+                    ],
+                    texan: [
+                        { singular: 'Texas pressure point', plural: 'Texas pressure points', SI: 6894.76, weight: 2, note: 'Exactly 1 psi' }
+                    ],
+                    academic: [
+                        { singular: 'psi (US)', plural: 'psi', SI: 6894.76, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'blast pressure', plural: 'blast pressures', SI: 6894.76, weight: 2, note: 'Per psi' }
+                    ]
+                }
+            },
+            {
+                canonical: 'BAR',
+                SI: 100000,
+                dimension: 'PRESSURE',
+                aliases: ['bar', 'bars'],
+                replacements: {
+                    patriot: [
+                        { singular: 'atmosphere', plural: 'atmospheres', SI: 101325, weight: 2, note: '1 atm ~14.5 psi' }
+                    ],
+                    texan: [
+                        { singular: 'Texas pressure bar', plural: 'Texas pressure bars', SI: 100000, weight: 2, note: 'Exactly 1 bar' }
+                    ],
+                    academic: [
+                        { singular: 'bar (SI)', plural: 'bar', SI: 100000, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'detonation pressure', plural: 'detonation pressures', SI: 100000, weight: 1, note: 'Standard pressure unit' }
+                    ]
+                }
+            },
+            {
+                canonical: 'PASCAL',
+                SI: 1.0,
+                dimension: 'PRESSURE',
+                aliases: ['Pa', 'pascal', 'pascals'],
+                replacements: {
+                    patriot: [
+                        { singular: 'microbar', plural: 'microbars', SI: 0.1, weight: 1, note: 'μbar' }
+                    ],
+                    texan: [
+                        { singular: 'Texas pascal', plural: 'Texas pascals', SI: 1.0, weight: 2, note: 'Exactly 1 Pa' }
+                    ],
+                    academic: [
+                        { singular: 'Pa (SI)', plural: 'Pa', SI: 1.0, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'radiation pressure', plural: 'radiation pressures', SI: 1.0, weight: 1, note: 'Per pascal' }
+                    ]
+                }
+            },
+
+            // ==================== VELOCITY ====================
+            {
+                canonical: 'MPH',
+                SI: 0.44704,
+                dimension: 'VELOCITY',
+                aliases: ['mph', 'mi/h', 'miles per hour'],
+                replacements: {
+                    patriot: [
+                        { singular: 'Walmart cart speed', plural: 'Walmart cart speeds', SI: 2.2352, weight: 3, note: '~5 mph electric scooter' },
+                        { singular: 'suburban cruising speed', plural: 'suburban cruising speeds', SI: 13.4112, weight: 2, note: '~30 mph neighborhood' },
+                        { singular: 'interstate highway speed', plural: 'interstate highway speeds', SI: 29.0688, weight: 2, note: '~65 mph freeway' }
+                    ],
+                    texan: [
+                        { singular: 'Texas back-road speed', plural: 'Texas back-road speeds', SI: 11.1760, weight: 2, note: '~25 mph rural route' },
+                        { singular: 'Texas highway speed', plural: 'Texas highway speeds', SI: 32.311, weight: 2, note: '~72 mph cruise' }
+                    ],
+                    academic: [
+                        { singular: 'mph (US)', plural: 'mph', SI: 0.44704, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'refugee escape speed', plural: 'refugee escape speeds', SI: 22.352, weight: 2, note: '~50 mph getaway' },
+                        { singular: 'fallout plume speed', plural: 'fallout plume speeds', SI: 4.4704, weight: 1, note: '~10 mph wind drift' }
+                    ]
+                }
+            },
+            {
+                canonical: 'FPS',
+                SI: 0.30480,
+                dimension: 'VELOCITY',
+                aliases: ['ft/s', 'fps', 'feet per second'],
+                replacements: {
+                    patriot: [
+                        { singular: 'football field per second', plural: 'football fields per second', SI: 91.44, weight: 3, note: 'Exact: 100 yd/s' },
+                        { singular: 'brisk walk', plural: 'brisk walks', SI: 1.5240, weight: 2, note: '~5 fps' }
+                    ],
+                    texan: [
+                        { singular: 'Texas football field per second', plural: 'Texas football fields per second', SI: 91.44, weight: 2, note: 'Exactly 1 per sec' }
+                    ],
+                    academic: [
+                        { singular: 'ft/s (US)', plural: 'ft/s', SI: 0.30480, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'bullet velocity', plural: 'bullet velocities', SI: 850, weight: 1, note: '~2,800 fps for .308' }
+                    ]
+                }
+            },
+            {
+                canonical: 'M_PER_S',
+                SI: 1.0,
+                dimension: 'VELOCITY',
+                aliases: ['m/s', 'meters per second'],
+                replacements: {
+                    patriot: [
+                        { singular: 'golf club per second', plural: 'golf clubs per second', SI: 0.9398, weight: 2, note: '37 in club' }
+                    ],
+                    texan: [
+                        { singular: 'Texas meter per second', plural: 'Texas meters per second', SI: 1.0, weight: 2, note: 'Exactly 1 m/s' }
+                    ],
+                    academic: [
+                        { singular: 'm/s (SI)', plural: 'm/s', SI: 1.0, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'shockwave velocity', plural: 'shockwave velocities', SI: 1.0, weight: 1, note: 'Per meter per second' }
+                    ]
+                }
+            },
+            {
+                canonical: 'KM_PER_H',
+                SI: 0.27778,
+                dimension: 'VELOCITY',
+                aliases: ['km/h', 'kph', 'kilometers per hour'],
+                replacements: {
+                    patriot: [
+                        { singular: 'football field per minute', plural: 'football fields per minute', SI: 1.524, weight: 2, note: '100 yd / 60s' }
+                    ],
+                    texan: [
+                        { singular: 'Texas kilometer per hour', plural: 'Texas kilometers per hour', SI: 0.27778, weight: 2, note: 'Exactly 1 km/h' }
+                    ],
+                    academic: [
+                        { singular: 'km/h (SI)', plural: 'km/h', SI: 0.27778, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'contamination spread rate', plural: 'contamination spread rates', SI: 0.27778, weight: 1, note: 'Per km/h' }
+                    ]
+                }
+            },
+
+            // ==================== ACCELERATION ====================
+            {
+                canonical: 'FT_PER_S2',
+                SI: 0.30480,
+                dimension: 'ACCELERATION',
+                aliases: ['ft/s²', 'ft/sec²'],
+                replacements: {
+                    patriot: [
+                        { singular: 'Subway Footlong per second squared', plural: 'Subway Footlongs per second squared', SI: 0.2921, weight: 3, note: '~11.5 in footlong' },
+                        { singular: 'gravity fraction', plural: 'gravity fractions', SI: 3.0705, weight: 2, note: '~0.1g' }
+                    ],
+                    texan: [
+                        { singular: 'Texas acceleration', plural: 'Texas accelerations', SI: 0.30480, weight: 2, note: 'Exactly 1 ft/s²' }
+                    ],
+                    academic: [
+                        { singular: 'ft/s² (US)', plural: 'ft/s²', SI: 0.30480, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'blast wave acceleration', plural: 'blast wave accelerations', SI: 0.30480, weight: 1, note: 'Per ft/s²' }
+                    ]
+                }
+            },
+            {
+                canonical: 'G_FORCE',
+                SI: 9.80665,
+                dimension: 'ACCELERATION',
+                aliases: ['g', 'g-force', 'g force', 'gee', 'G'],
+                replacements: {
+                    patriot: [
+                        { singular: 'Big Mac lift per second squared', plural: 'Big Mac lifts per second squared', SI: 2.14817, weight: 2, note: '~4.56 per Big Mac' }
+                    ],
+                    texan: [
+                        { singular: 'Texas G force', plural: 'Texas G forces', SI: 9.80665, weight: 2, note: 'Exactly 1g' }
+                    ],
+                    academic: [
+                        { singular: 'g (SI)', plural: 'g', SI: 9.80665, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'impact G', plural: 'impact Gs', SI: 9.80665, weight: 2, note: 'Acceleration due to gravity' }
+                    ]
+                }
+            },
+            {
+                canonical: 'M_PER_S2',
+                SI: 1.0,
+                dimension: 'ACCELERATION',
+                aliases: ['m/s²', 'meters per second squared'],
+                replacements: {
+                    patriot: [
+                        { singular: 'LEGO stud per second squared', plural: 'LEGO studs per second squared', SI: 0.0080, weight: 2, note: '8mm pitch' }
+                    ],
+                    texan: [
+                        { singular: 'Texas acceleration meter', plural: 'Texas acceleration meters', SI: 1.0, weight: 2, note: 'Exactly 1 m/s²' }
+                    ],
+                    academic: [
+                        { singular: 'm/s² (SI)', plural: 'm/s²', SI: 1.0, weight: 3 }
+                    ],
+                    apocalypse: [
+                        { singular: 'shockwave acceleration', plural: 'shockwave accelerations', SI: 1.0, weight: 1, note: 'Per m/s²' }
+                    ]
+                }
+            }
+        ];
+
+        // =====================================================
+        // UTILITY FUNCTIONS
+        // =====================================================
+
+        function getUnitByCanonical(canonical) {
+            return UNIT_DICT.find(u => u.canonical === canonical);
+        }
+
+        function normalizeUnit(unitStr) {
+            const normalized = unitStr.toLowerCase().trim();
+
+            // Check if user has disambiguated this unit
+            if (unitDisambiguations[normalized]) {
+                return unitDisambiguations[normalized];
+            }
+
+            for (const unit of UNIT_DICT) {
+                if (unit.aliases.includes(normalized) || unit.aliases.some(a => a.toLowerCase() === normalized)) {
+                    return unit.canonical;
+                }
+            }
+            return null;
+        }
+
+        function parseNumber(numStr) {
+            const original = numStr.trim();
+            let cleaned = original.replace(/,/g, '');
+            let isK = false;
+            if (/[kK]$/.test(cleaned)) {
+                isK = true;
+                cleaned = cleaned.slice(0, -1);
+            }
+            const value = parseFloat(cleaned);
+            if (isNaN(value)) return null;
+            return isK ? value * 1000 : value;
+        }
+
+        function formatNumber(value, original) {
+            const originalStr = original.trim();
+            let formatted = value.toString();
+
+            const hasComma = originalStr.includes(',');
+            const hasK = /[kK]$/.test(originalStr);
+            const decimalPlaces = originalStr.includes('.') ? originalStr.split('.')[1].length : 0;
+
+            if (hasComma && Math.abs(value) >= 1000) {
+                const parts = formatted.split('.');
+                parts[0] = parseInt(parts[0]).toLocaleString('en-US');
+                formatted = parts.join('.');
+            }
+
+            if (hasK && Math.abs(value) >= 1000) {
+                formatted = (Math.round(value / 1000 * 10) / 10).toString() + 'k';
+            } else if (decimalPlaces > 0) {
+                const decimals = Math.max(decimalPlaces, 1);
+                formatted = value.toFixed(decimals);
+            } else {
+                formatted = Math.round(value).toString();
+            }
+
+            return formatted;
+        }
+
+        function pickRandomReplacement(replacements, weight = 1) {
+            if (!replacements || replacements.length === 0) return null;
+            let totalWeight = replacements.reduce((sum, r) => sum + (r.weight || 1), 0);
+            let rand = Math.random() * totalWeight;
+            for (const replacement of replacements) {
+                rand -= (replacement.weight || 1);
+                if (rand <= 0) return replacement;
+            }
+            return replacements[replacements.length - 1];
+        }
+
+        // =====================================================
+        // PARSING & CONVERSION LOGIC
+        // =====================================================
+
+        // Units that have legitimate alternative interpretations based on context
+        const AMBIGUOUS_UNITS = {
+            'lb': { primary: 'POUND', alternatives: ['POUND_FORCE'], hint: 'mass or force?' },
+            'lbs': { primary: 'POUND', alternatives: ['POUND_FORCE'], hint: 'mass or force?' },
+            'pound': { primary: 'POUND', alternatives: ['POUND_FORCE'], hint: 'mass or force?' },
+            'pounds': { primary: 'POUND', alternatives: ['POUND_FORCE'], hint: 'mass or force?' },
+            'oz': { primary: 'OUNCE', alternatives: ['FL_OZ'], hint: 'weight or volume?' }
+        };
+
+        function findMeasurements(text) {
+            const measurements = [];
+
+            // Compound patterns first (high priority)
+            const compoundPatterns = [
+                /(\d[\d,]*\.?\d*[kK]?)\s*(lb\-?ft|lb\s+ft|pound\s*feet?|pound\-?force\s*feet?)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(n\-?m|newton\s*meter|newton\-?metre)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(sq\s*ft|sq\s*foot|sq\s*feet|ft²|square\s*feet?)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(sq\s*in|sq\s*inch|in²|square\s*inch(?:es)?)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(sq\s*yd|sq\s*yard|yd²|square\s*yard)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(sq\s*mi|sq\s*mile|mi²|square\s*mile)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(cu\s*ft|cu\s*foot|ft³|cubic\s*feet?)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(cu\s*in|cu\s*inch|in³|cubic\s*inch(?:es)?)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(fl\s*oz|fluid\s*oz(?:ounce)?)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(lb\s*force|lb\-force|lbf)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(ft\/s²|ft\/sec²|feet\s*per\s*second\s*squared)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(ft\/s|ft\/sec|feet\s*per\s*second|fps)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(psi|lb\/in²|lbf\/in²)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(mph|miles?\s*per\s*hour)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(m\/s|meters?\s*per\s*second)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(km\/h|kph|kilometers?\s*per\s*hour)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(m\/s²|meters?\s*per\s*second\s*squared)/gi
+            ];
+
+            // Simple patterns (lower priority)
+            const simplePatterns = [
+                /(\d[\d,]*\.?\d*[kK]?)\s*(ft|foot|feet|')/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(in|inch|inches|")/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(yd|yard|yards)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(mi|mile|miles)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(m|meter|metre|meters|metres)(?![\w])/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(km|kilometer|kilometre)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(lb|lbs|pound|pounds)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(oz|ounce|ounces)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(gram|grams)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(kg|kilogram|kilograms)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(ton|tons)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(gallon|gallons|gal)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(cup|cups)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(pint|pints|pt)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(quart|quarts|qt)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(liter|litre|L)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(N|newton|newtons)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(Pa|pascal|pascals)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(bar|bars)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(g-force|g\s+force|gee|G)(?!\w)/gi
+            ];
+
+            const allPatterns = [...compoundPatterns, ...simplePatterns];
+            const matched = new Set();
+
+            for (const pattern of allPatterns) {
+                let match;
+                while ((match = pattern.exec(text)) !== null) {
+                    const fullMatch = match[0];
+                    if (matched.has(match.index)) continue;
+                    matched.add(match.index);
+
+                    const number = parseNumber(match[1]);
+                    const unitStr = match[2].toLowerCase();
+                    const canonical = normalizeUnit(unitStr);
+
+                    if (number !== null && canonical) {
+                        const meas = {
+                            index: match.index,
+                            match: fullMatch,
+                            number,
+                            unit: canonical,
+                            original: match[1],
+                            unitStr,
+                            isAmbiguous: false,
+                            alternatives: []
+                        };
+
+                        // Check if this unit is ambiguous
+                        const normalized = unitStr.toLowerCase();
+                        if (AMBIGUOUS_UNITS[normalized]) {
+                            const ambig = AMBIGUOUS_UNITS[normalized];
+                            if (canonical === ambig.primary || ambig.alternatives.includes(canonical)) {
+                                meas.isAmbiguous = true;
+                                meas.alternatives = ambig.alternatives.filter(a => a !== canonical);
+                                meas.hint = ambig.hint;
+                            }
+                        }
+
+                        measurements.push(meas);
+                    }
+                }
+            }
+
+            measurements.sort((a, b) => a.index - b.index);
+            return measurements;
+        }
+
+        function convertMeasurement(measurement, mode = 'patriot') {
+            const unitDef = getUnitByCanonical(measurement.unit);
+            if (!unitDef) return null;
+
+            const modeReplacements = unitDef.replacements[mode] || unitDef.replacements.patriot;
+            if (!modeReplacements || modeReplacements.length === 0) return null;
+
+            // Filter replacements to avoid tiny (< 0.5) or huge (> 100) numbers
+            const reasonableReplacements = modeReplacements.filter(repl => {
+                const testValue = Math.abs(measurement.number * (unitDef.SI / repl.SI));
+                return testValue >= 0.5 && testValue <= 100;
+            });
+
+            // If all would produce unreasonable values, allow the least bad one
+            const replacementsToUse = reasonableReplacements.length > 0 ? reasonableReplacements : modeReplacements;
+
+            const replacement = pickRandomReplacement(replacementsToUse);
+            if (!replacement) return null;
+
+            const newValue = measurement.number * (unitDef.SI / replacement.SI);
+            const formattedValue = formatNumber(newValue, measurement.original);
+
+            const usesSingular = Math.abs(newValue - 1.0) < 0.05;
+            const unitName = usesSingular ? replacement.singular : replacement.plural;
+
+            return {
+                oldText: measurement.match,
+                newText: `${formattedValue} ${unitName}`,
+                highlighted: true
+            };
+        }
+
+        function convertText(text, mode = 'patriot') {
+            const measurements = findMeasurements(text);
+            if (measurements.length === 0) return text;
+
+            const conversions = measurements.map((m, idx) => {
+                const conv = convertMeasurement(m, mode);
+                if (conv && m.isAmbiguous && m.alternatives.length > 0) {
+                    // Create alternatives for ambiguous units
+                    const altConversions = [];
+                    for (const altUnit of m.alternatives) {
+                        const altM = {...m, unit: altUnit};
+                        const altConv = convertMeasurement(altM, mode);
+                        if (altConv) altConversions.push(altConv.newText);
+                    }
+                    return {...conv, alternatives: altConversions, hint: m.hint, measurementIdx: idx};
+                }
+                return conv;
+            }).filter(c => c !== null);
+            if (conversions.length === 0) return text;
+
+            conversions.sort((a, b) => measurements.find(m => m.match === a.oldText).index - measurements.find(m => m.match === b.oldText).index);
+
+            let result = text;
+            for (let i = conversions.length - 1; i >= 0; i--) {
+                const conv = conversions[i];
+                const meas = measurements.find(m => m.match === conv.oldText);
+                const index = result.lastIndexOf(conv.oldText);
+                if (index !== -1) {
+                    const before = result.substring(0, index);
+                    const after = result.substring(index + conv.oldText.length);
+
+                    if (conv.alternatives && conv.alternatives.length > 0) {
+                        // Render as clickable dropdown with alternatives
+                        const menuId = `menu-${Math.random().toString(36).substr(2, 9)}`;
+                        const altHtml = conv.alternatives.map((alt, idx) => {
+                            const altUnit = meas.alternatives[idx];
+                            return `<button class="alt-unit" onclick="applyAltConversion('${meas.unitStr}', '${altUnit}'); document.getElementById('${menuId}').classList.remove('open');">${alt}</button>`;
+                        }).join('');
+                        result = before + `<span class="ambiguous-unit"><mark class="converted">${conv.newText}</mark><span class="ambig-arrow" onclick="document.getElementById('${menuId}').classList.toggle('open')">▼</span><div class="alt-menu" id="${menuId}">${altHtml}</div></span>` + after;
+                    } else {
+                        result = before + `<mark class="converted">${conv.newText}</mark>` + after;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        // =====================================================
+        // UI EVENT HANDLERS
+        // =====================================================
+
+        let currentMode = 'patriot';
+
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentMode = this.dataset.mode;
+                if (document.getElementById('input').value.trim()) {
+                    performConversion();
+                }
+            });
+        });
+
+        function performConversion() {
+            const inputText = document.getElementById('input').value;
+            if (!inputText.trim()) {
+                document.getElementById('output').innerHTML = 'Output will appear here after conversion';
+                return;
+            }
+            const outputHTML = convertText(inputText, currentMode);
+            document.getElementById('output').innerHTML = outputHTML;
+        }
+
+        document.getElementById('convert-btn').addEventListener('click', performConversion);
+        document.getElementById('input').addEventListener('input', function() {
+            if (this.value.trim()) performConversion();
+        });
+
+        document.getElementById('copy-btn').addEventListener('click', function() {
+            const output = document.getElementById('output');
+            const text = output.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = this;
+                const original = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = original;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        });
+
+        // =====================================================
+        // ADMIN PANEL
+        // =====================================================
+
+        const ADMIN_PASSWORD_ROT13 = 'nzrevpnSh**L%nn';
+        function decodeAdminPassword(encoded) {
+            return 'AmericaFuckYeah';
+        }
+
+        document.getElementById('admin-trigger').addEventListener('click', function() {
+            document.getElementById('adminOverlay').classList.add('active');
+            document.getElementById('admin-password').focus();
+        });
+
+        window.addEventListener('hashchange', function() {
+            if (location.hash === '#AmericaFuckYeah') {
+                document.getElementById('adminOverlay').classList.add('active');
+                document.getElementById('admin-password').focus();
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', function() {
+            if (location.hash === '#AmericaFuckYeah') {
+                document.getElementById('adminOverlay').classList.add('active');
+                document.getElementById('admin-password').focus();
+            }
+        });
+
+        function closeAdmin() {
+            document.getElementById('adminOverlay').classList.remove('active');
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('admin-password').value = '';
+            document.getElementById('admin-error').style.display = 'none';
+        }
+
+        function checkAdminPassword() {
+            const password = document.getElementById('admin-password').value;
+            if (password === 'AmericaFuckYeah') {
+                openAdminPanel();
+            } else {
+                const errorDiv = document.getElementById('admin-error');
+                errorDiv.textContent = 'Invalid authorization code';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function openAdminPanel() {
+            document.getElementById('adminOverlay').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'flex';
+            document.getElementById('admin-password').value = '';
+            document.getElementById('admin-error').style.display = 'none';
+            populateUnitsTable();
+        }
+
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function populateUnitsTable() {
+            const tbody = document.getElementById('units-tbody');
+            tbody.innerHTML = UNIT_DICT.map((unit, idx) => `
+                <tr class="unit-row-header" onclick="toggleUnitDetails(${idx})">
+                    <td><span class="unit-toggle">▼</span>${unit.canonical}</td>
+                    <td>${unit.dimension}</td>
+                    <td>${unit.SI.toExponential(3)}</td>
+                    <td style="font-size: 0.8em; color: #8b949e;">${unit.aliases.join(', ')}</td>
+                    <td><button class="admin-button danger" onclick="deleteUnit(${idx}); event.stopPropagation();">Delete</button></td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        <div id="details-${idx}" class="unit-details">
+                            <strong>Replacements by Mode:</strong>
+                            <div style="margin-top: 10px;">
+                                ${['patriot', 'texan', 'academic', 'apocalypse'].map(mode => `
+                                    <div style="margin-bottom: 15px;">
+                                        <strong style="text-transform: uppercase; color: #ffd700;">${mode}</strong>
+                                        <div id="replacements-${idx}-${mode}">
+                                            ${(unit.replacements[mode] || []).map((r, rIdx) => `
+                                                <div class="replacement-item">
+                                                    <span>${r.singular} (SI: ${r.SI.toExponential(2)})</span>
+                                                    <button class="admin-button danger" onclick="deleteReplacement(${idx}, '${mode}', ${rIdx})" style="padding: 4px 8px;">×</button>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                        <button class="admin-button" onclick="showAddReplacementForm(${idx}, '${mode}')" style="margin-top: 6px; font-size: 0.8em;">+ Add ${mode}</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleUnitDetails(idx) {
+            const details = document.getElementById(`details-${idx}`);
+            details.classList.toggle('open');
+            event.currentTarget.querySelector('.unit-toggle').textContent = details.classList.contains('open') ? '▼' : '▶';
+        }
+
+        function deleteUnit(idx) {
+            if (confirm(`Delete unit ${UNIT_DICT[idx].canonical}?`)) {
+                UNIT_DICT.splice(idx, 1);
+                saveToLocalStorage();
+                populateUnitsTable();
+                showMessage('Unit deleted');
+            }
+        }
+
+        function deleteReplacement(unitIdx, mode, replIdx) {
+            const unit = UNIT_DICT[unitIdx];
+            unit.replacements[mode].splice(replIdx, 1);
+            saveToLocalStorage();
+            populateUnitsTable();
+            showMessage('Replacement deleted');
+        }
+
+        function createNewUnit() {
+            const canonical = document.getElementById('new-canonical').value.toUpperCase();
+            const dimension = document.getElementById('new-dimension').value;
+            const si = parseFloat(document.getElementById('new-si').value);
+            const aliases = document.getElementById('new-aliases').value.split(',').map(a => a.trim());
+
+            if (!canonical || !dimension || isNaN(si)) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            const newUnit = {
+                canonical,
+                SI: si,
+                dimension,
+                aliases,
+                replacements: {
+                    patriot: [{ singular: 'absurd unit', plural: 'absurd units', SI: si, weight: 1, note: 'placeholder' }],
+                    texan: [{ singular: 'Texas unit', plural: 'Texas units', SI: si, weight: 1, note: 'placeholder' }],
+                    academic: [{ singular: canonical, plural: canonical, SI: si, weight: 1, note: 'placeholder' }],
+                    apocalypse: [{ singular: 'survival unit', plural: 'survival units', SI: si, weight: 1, note: 'placeholder' }]
+                }
+            };
+
+            UNIT_DICT.push(newUnit);
+            saveToLocalStorage();
+            populateUnitsTable();
+            document.getElementById('new-canonical').value = '';
+            document.getElementById('new-si').value = '';
+            document.getElementById('new-aliases').value = '';
+            showMessage(`Unit ${canonical} created! Add replacements in the Units tab.`);
+        }
+
+        function exportDictionary() {
+            const dataStr = JSON.stringify(UNIT_DICT, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `freedom-units-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            showMessage('Dictionary exported');
+        }
+
+        function importDictionary() {
+            const file = document.getElementById('import-file').files[0];
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (!Array.isArray(imported)) throw new Error('Invalid format');
+
+                    // Merge with existing
+                    imported.forEach(newUnit => {
+                        const existing = UNIT_DICT.findIndex(u => u.canonical === newUnit.canonical);
+                        if (existing >= 0) {
+                            UNIT_DICT[existing] = newUnit;
+                        } else {
+                            UNIT_DICT.push(newUnit);
+                        }
+                    });
+
+                    saveToLocalStorage();
+                    populateUnitsTable();
+                    document.getElementById('import-file').value = '';
+                    showMessage(`Imported ${imported.length} units`);
+                } catch (err) {
+                    alert('Invalid JSON file: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetToDefaults() {
+            if (confirm('Really reset to factory defaults? This will delete all custom units.')) {
+                localStorage.removeItem('freedomDict');
+                location.reload();
+            }
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('freedomDict', JSON.stringify(UNIT_DICT));
+        }
+
+        function showMessage(msg) {
+            const msgDiv = document.getElementById('admin-message');
+            msgDiv.textContent = '✓ ' + msg;
+            msgDiv.style.display = 'block';
+            setTimeout(() => msgDiv.style.display = 'none', 3000);
+        }
+
+        document.getElementById('admin-password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkAdminPassword();
+        });
+
+        // Track user's unit disambiguations
+        const unitDisambiguations = {};
+
+        window.applyAltConversion = function(unitStr, altCanonical) {
+            // Store the user's choice for this unit
+            const normalized = unitStr.toLowerCase();
+            unitDisambiguations[normalized] = altCanonical;
+            // Re-convert with the new preference
+            performConversion();
+        };
+
+        // Close dropdown menus when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.ambiguous-unit')) {
+                document.querySelectorAll('.alt-menu.open').forEach(menu => {
+                    menu.classList.remove('open');
+                });
+            }
+        });
+
+        // Load dictionary from localStorage if available
+        const savedDict = localStorage.getItem('freedomDict');
+        if (savedDict) {
+            try {
+                const parsed = JSON.parse(savedDict);
+                if (Array.isArray(parsed)) {
+                    UNIT_DICT.length = 0;
+                    UNIT_DICT.push(...parsed);
+                }
+            } catch (e) {
+                console.warn('Could not load saved dictionary:', e);
+            }
+        }
+
+        // Initialize
+        document.getElementById('output').innerHTML = 'Paste technical text and click "Convert to Freedom Units" or start typing to auto-convert.';
+    </script>
+</body>
+</html>
