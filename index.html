@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Freedom Unit Converter</title>
+    <title>Freedom Unit Converter - Convert to Absurd American Units</title>
+    <meta name="description" content="Convert technical measurements to hilarious freedom units. Transform meters into Subway Footlongs, kilograms into Big Macs, and more. Patriot, Texan, Academic, and Apocalypse modes.">
+    <meta name="keywords" content="unit converter, freedom units, measurement converter, American units">
+    <meta property="og:title" content="Freedom Unit Converter">
+    <meta property="og:description" content="Convert technical measurements to absurd but dimensionally-correct American units.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://freedomunitconverter.com">
+    <meta property="og:image" content="https://freedomunitconverter.com/banner.png">
+    <meta name="theme-color" content="#b22234">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -35,8 +43,17 @@
         header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 2px solid #30363d;
+            border-bottom: 3px solid;
+            border-image: linear-gradient(90deg, #b22234, #ffffff, #3c3b6b) 1;
             padding-bottom: 20px;
+        }
+
+        .banner {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(178, 34, 52, 0.2);
         }
 
         h1 {
@@ -44,11 +61,16 @@
             margin-bottom: 10px;
             color: #e6edf3;
             letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #b22234 0%, #b22234 20%, #ffffff 20%, #ffffff 40%, #3c3b6b 40%, #3c3b6b 60%, #ffffff 60%, #ffffff 80%, #b22234 80%, #b22234 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            padding: 10px 0;
         }
 
         h1::before {
-            content: "★ ";
-            color: #b22234;
+            content: "🇺🇸 ";
+            margin-right: 8px;
         }
 
         .subtitle {
@@ -725,6 +747,7 @@
 <body>
     <div class="container">
         <header>
+            <img src="banner.png" alt="Freedom Unit Converter Banner" class="banner" onerror="this.style.display='none'">
             <h1>FREEDOM UNIT CONVERTER</h1>
             <p class="subtitle">Dimensionally-consistent American measurement science since 2025</p>
         </header>
@@ -888,6 +911,7 @@
         // BACKEND CONFIG
         // =====================================================
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzjqEBoWg9w6QrgTuL226iIcEz2GM3vPqXXJxa5uicRN33wUbCgo-pcNAG_QNp0jEPBAg/exec';
+
         let writeToken = null;
 
         // =====================================================
