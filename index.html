@@ -2157,6 +2157,33 @@
             showMessage('Replacement deleted');
         }
 
+        function showAddReplacementForm(unitIdx, mode) {
+            const unit = UNIT_DICT[unitIdx];
+            const singular = prompt(`Add ${mode} replacement for ${unit.canonical}\nSingular name (e.g., "shotgun shell casing"):`);
+            if (!singular) return;
+            const plural = prompt(`Plural name for "${singular}":`);
+            if (!plural) return;
+            const siStr = prompt(`SI value for this replacement (e.g., 0.03175 for 1.25 inches):`);
+            if (!siStr) return;
+            const si = parseFloat(siStr);
+            if (isNaN(si)) { alert('Invalid SI value'); return; }
+            const weight = prompt('Weight/preference (1-3, higher = more likely):', '2');
+            const w = parseInt(weight) || 2;
+            const note = prompt('Note (optional, e.g., caliber info):');
+
+            unit.replacements[mode].push({
+                singular,
+                plural,
+                SI: si,
+                weight: w,
+                note: note || ''
+            });
+
+            saveToLocalStorage();
+            populateUnitsTable();
+            showMessage(`Added "${singular}" to ${unit.canonical} ${mode}`);
+        }
+
         function createNewUnit() {
             const canonical = document.getElementById('new-canonical').value.toUpperCase();
             const dimension = document.getElementById('new-dimension').value;
