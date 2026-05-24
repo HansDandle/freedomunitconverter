@@ -2393,7 +2393,7 @@
             const statusDiv = form.querySelector('.suggest-status');
             statusDiv.className = 'suggest-status';
 
-            if (!APPS_SCRIPT_URL.includes('/exec')) {
+            if (!APPS_SCRIPT_URL || !APPS_SCRIPT_URL.startsWith('https://')) {
                 statusDiv.className = 'suggest-status error';
                 statusDiv.textContent = 'Apps Script not configured yet. Check back soon!';
                 return;
