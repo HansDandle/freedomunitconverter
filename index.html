@@ -587,6 +587,90 @@
             font-size: 0.85em;
         }
 
+        .suggest-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .suggest-section summary {
+            font-weight: 600;
+            color: #ffd700;
+            margin-bottom: 15px;
+            user-select: none;
+        }
+
+        .suggest-section summary:hover {
+            color: #ffed4e;
+        }
+
+        #suggest-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #suggest-form input,
+        #suggest-form textarea {
+            padding: 10px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            color: #e6edf3;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        #suggest-form input:focus,
+        #suggest-form textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.1);
+        }
+
+        #suggest-form textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        #suggest-form button {
+            background: #0d419f;
+            color: #e6edf3;
+            border: 1px solid #1f6feb;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        #suggest-form button:hover {
+            background: #388bfd;
+        }
+
+        .suggest-status {
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            text-align: center;
+            display: none;
+        }
+
+        .suggest-status.success {
+            background: rgba(63, 185, 80, 0.15);
+            color: #3fb950;
+            display: block;
+        }
+
+        .suggest-status.error {
+            background: rgba(255, 123, 114, 0.15);
+            color: #ff7b72;
+            display: block;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.8em;
@@ -683,6 +767,18 @@
                 <em>"The tank holds approximately 500 gallons and weighs 5,000 lb when full."</em>
             </div>
         </div>
+
+        <details class="suggest-section">
+            <summary>💡 Suggest a unit</summary>
+            <form id="suggest-form">
+                <input type="text" name="suggestedName" placeholder="Absurd unit name (e.g., 'Big Mac-lengths')" required>
+                <input type="text" name="originalUnit" placeholder="What unit does it replace? (e.g., foot)">
+                <input type="text" name="siValue" placeholder="SI value in meters/kg/etc. (optional)">
+                <textarea name="notes" placeholder="Why is this funny? / Calibration notes / Any details (optional)"></textarea>
+                <button type="submit">Submit suggestion</button>
+                <div class="suggest-status"></div>
+            </form>
+        </details>
     </div>
 
     <div class="admin-overlay" id="adminOverlay">
@@ -759,7 +855,11 @@
 
             <!-- IMPORT/EXPORT TAB -->
             <div id="trade-tab" class="admin-content">
-                <h3>Backup & Restore</h3>
+                <h3>Cloud & Backup</h3>
+                <div style="margin-bottom: 20px;">
+                    <button class="admin-button" onclick="pushDictionaryToCloud()" style="background: #238636;">☁️ Push Dictionary to Cloud</button>
+                    <p style="font-size: 0.85em; color: #8b949e; margin-top: 8px;">Save your dictionary to Google Sheets. You'll be asked for your write token once per session.</p>
+                </div>
                 <div style="margin-bottom: 20px;">
                     <button class="admin-button" onclick="exportDictionary()">📥 Export Dictionary as JSON</button>
                     <p style="font-size: 0.85em; color: #8b949e; margin-top: 8px;">Download your unit dictionary for backup or sharing</p>
@@ -780,6 +880,12 @@
     <button id="admin-trigger" title="Admin">📡</button>
 
     <script>
+        // =====================================================
+        // BACKEND CONFIG
+        // =====================================================
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec';
+        let writeToken = null;
+
         // =====================================================
         // UNIT DICTIONARY — Factory Defaults
         // =====================================================
@@ -2143,6 +2249,32 @@
             setTimeout(() => msgDiv.style.display = 'none', 3000);
         }
 
+        async function pushDictionaryToCloud() {
+            if (!APPS_SCRIPT_URL.includes('/exec')) {
+                alert('Apps Script URL not configured. Replace APPS_SCRIPT_URL in the code first.');
+                return;
+            }
+            if (!writeToken) {
+                writeToken = prompt('Enter your write token (from Apps Script Script Properties):');
+                if (!writeToken) return;
+            }
+            try {
+                const res = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'push_dictionary', token: writeToken, dictionary: UNIT_DICT })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    showMessage('Dictionary pushed to cloud ✓');
+                } else {
+                    showMessage('Push failed — wrong token?');
+                    writeToken = null;
+                }
+            } catch (e) {
+                showMessage('Network error: ' + e.message);
+            }
+        }
+
         document.getElementById('admin-password').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') checkAdminPassword();
         });
@@ -2167,19 +2299,79 @@
             }
         });
 
-        // Load dictionary from localStorage if available
-        const savedDict = localStorage.getItem('freedomDict');
-        if (savedDict) {
+        // Load dictionary from cloud first, fall back to localStorage
+        async function loadDictionary() {
             try {
-                const parsed = JSON.parse(savedDict);
-                if (Array.isArray(parsed)) {
+                const res = await fetch(APPS_SCRIPT_URL + '?action=dictionary', { timeout: 3000 });
+                const cloudDict = await res.json();
+                if (Array.isArray(cloudDict) && cloudDict.length > 0) {
                     UNIT_DICT.length = 0;
-                    UNIT_DICT.push(...parsed);
+                    UNIT_DICT.push(...cloudDict);
+                    localStorage.setItem('freedomDict', JSON.stringify(cloudDict));
+                    return;
                 }
             } catch (e) {
-                console.warn('Could not load saved dictionary:', e);
+                // Silently fall back to localStorage if cloud unavailable
+            }
+
+            // Fall back to localStorage cache
+            const saved = localStorage.getItem('freedomDict');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) {
+                        UNIT_DICT.length = 0;
+                        UNIT_DICT.push(...parsed);
+                    }
+                } catch (e) {
+                    console.warn('Could not load saved dictionary:', e);
+                }
             }
         }
+
+        loadDictionary();
+
+        // Suggestion form handler
+        document.getElementById('suggest-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const statusDiv = form.querySelector('.suggest-status');
+            statusDiv.className = 'suggest-status';
+
+            if (!APPS_SCRIPT_URL.includes('/exec')) {
+                statusDiv.className = 'suggest-status error';
+                statusDiv.textContent = 'Apps Script not configured yet. Check back soon!';
+                return;
+            }
+
+            const data = {
+                action: 'suggest',
+                suggestedName: form.suggestedName.value,
+                originalUnit: form.originalUnit.value || '',
+                siValue: form.siValue.value || '',
+                notes: form.notes.value || ''
+            };
+
+            try {
+                const res = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.ok) {
+                    statusDiv.className = 'suggest-status success';
+                    statusDiv.textContent = '✓ Suggestion submitted! Thanks for the idea.';
+                    form.reset();
+                    setTimeout(() => statusDiv.className = 'suggest-status', 5000);
+                } else {
+                    statusDiv.className = 'suggest-status error';
+                    statusDiv.textContent = 'Error submitting suggestion';
+                }
+            } catch (err) {
+                statusDiv.className = 'suggest-status error';
+                statusDiv.textContent = 'Error: ' + err.message;
+            }
+        });
 
         // Initialize
         document.getElementById('output').innerHTML = 'Paste technical text and click "Convert to Freedom Units" or start typing to auto-convert.';
