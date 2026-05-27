@@ -439,7 +439,7 @@
         "canonical": "GRAM",
         "SI": 0.001,
         "dimension": "MASS",
-        "aliases": ["gram", "grams"],
+        "aliases": ["gram", "grams", "g"],
         "replacements": {
             "patriot": [
                 {"singular": "M&M candy", "plural": "M&M candies", "SI": 0.00085, "weight": 3, "note": "~0.85g per M&M"},
@@ -848,7 +848,7 @@
         "canonical": "G_FORCE",
         "SI": 9.80665,
         "dimension": "ACCELERATION",
-        "aliases": ["g", "g-force", "g force", "gee", "G"],
+        "aliases": ["g-force", "g force", "gee"],
         "replacements": {
             "patriot": [
                 {"singular": "Big Mac lift per second squared", "plural": "Big Mac lifts per second squared", "SI": 2.14817, "weight": 2, "note": "~4.56 per Big Mac"},

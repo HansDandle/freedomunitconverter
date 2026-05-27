@@ -1367,7 +1367,7 @@
                 canonical: 'GRAM',
                 SI: 0.001,
                 dimension: 'MASS',
-                aliases: ['gram', 'grams'],
+                aliases: ['gram', 'grams', 'g'],
                 replacements: {
                     patriot: [
                         { singular: 'M&M candy', plural: 'M&M candies', SI: 8.5e-4, weight: 3, note: '~0.85g per M&M' },
@@ -1788,7 +1788,7 @@
                 canonical: 'G_FORCE',
                 SI: 9.80665,
                 dimension: 'ACCELERATION',
-                aliases: ['g', 'g-force', 'g force', 'gee', 'G'],
+                aliases: ['g-force', 'g force', 'gee'],
                 replacements: {
                     patriot: [
                         { singular: 'Big Mac lift per second squared', plural: 'Big Mac lifts per second squared', SI: 2.14817, weight: 2, note: '~4.56 per Big Mac' },
@@ -1912,7 +1912,8 @@
             'lbs': { primary: 'POUND', alternatives: ['POUND_FORCE'], hint: 'mass or force?' },
             'pound': { primary: 'POUND', alternatives: ['POUND_FORCE'], hint: 'mass or force?' },
             'pounds': { primary: 'POUND', alternatives: ['POUND_FORCE'], hint: 'mass or force?' },
-            'oz': { primary: 'OUNCE', alternatives: ['FL_OZ'], hint: 'weight or volume?' }
+            'oz': { primary: 'OUNCE', alternatives: ['FL_OZ'], hint: 'weight or volume?' },
+            'g': { primary: 'GRAM', alternatives: ['G_FORCE'], hint: 'mass or acceleration?' }
         };
 
         function findMeasurements(text) {
@@ -1935,6 +1936,7 @@
                 /(\d[\d,]*\.?\d*[kK]?)\s*(psi|lb\/in²|lbf\/in²)/gi,
                 /(\d[\d,]*\.?\d*[kK]?)\s*(mph|miles?\s*per\s*hour)/gi,
                 /(\d[\d,]*\.?\d*[kK]?)\s*(m\/s|meters?\s*per\s*second)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(g-force|g\s+force)(?!\w)/gi,
                 /(\d[\d,]*\.?\d*[kK]?)\s*(km\/h|kph|kilometers?\s*per\s*hour)/gi,
                 /(\d[\d,]*\.?\d*[kK]?)\s*(m\/s²|meters?\s*per\s*second\s*squared)/gi
             ];
@@ -1949,7 +1951,7 @@
                 /(\d[\d,]*\.?\d*[kK]?)\s*(km|kilometer|kilometre)/gi,
                 /(\d[\d,]*\.?\d*[kK]?)\s*(pounds|pound|lbs|lb)/gi,
                 /(\d[\d,]*\.?\d*[kK]?)\s*(ounces|ounce|oz)/gi,
-                /(\d[\d,]*\.?\d*[kK]?)\s*(gram|grams)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(gram|grams|g)(?!\w)/gi,
                 /(\d[\d,]*\.?\d*[kK]?)\s*(kg|kilogram|kilograms)/gi,
                 /(\d[\d,]*\.?\d*[kK]?)\s*(ton|tons)/gi,
                 /(\d[\d,]*\.?\d*[kK]?)\s*(gallon|gallons|gal)/gi,
@@ -1960,7 +1962,7 @@
                 /(\d[\d,]*\.?\d*[kK]?)\s*(N|newton|newtons)/gi,
                 /(\d[\d,]*\.?\d*[kK]?)\s*(Pa|pascal|pascals)/gi,
                 /(\d[\d,]*\.?\d*[kK]?)\s*(bar|bars)/gi,
-                /(\d[\d,]*\.?\d*[kK]?)\s*(g-force|g\s+force|gee|G)(?!\w)/gi,
+                /(\d[\d,]*\.?\d*[kK]?)\s*(gee)(?!\w)/gi,
                 /(\d[\d,]*\.?\d*[kK]?)\s*(kcal|calories|calorie)(?!\w)/gi
             ];
 
