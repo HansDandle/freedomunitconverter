@@ -2438,9 +2438,16 @@
                 const res = await fetch(APPS_SCRIPT_URL + '?action=dictionary', { timeout: 3000 });
                 const cloudDict = await res.json();
                 if (Array.isArray(cloudDict) && cloudDict.length > 0) {
-                    UNIT_DICT.length = 0;
-                    UNIT_DICT.push(...cloudDict);
-                    localStorage.setItem('freedomDict', JSON.stringify(cloudDict));
+                    // Merge: cloud overrides existing units, but local-only units survive
+                    cloudDict.forEach(cloudUnit => {
+                        const idx = UNIT_DICT.findIndex(u => u.canonical === cloudUnit.canonical);
+                        if (idx >= 0) {
+                            UNIT_DICT[idx] = cloudUnit;
+                        } else {
+                            UNIT_DICT.push(cloudUnit);
+                        }
+                    });
+                    localStorage.setItem('freedomDict', JSON.stringify(UNIT_DICT));
                     return;
                 }
             } catch (e) {
@@ -2453,8 +2460,14 @@
                 try {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed)) {
-                        UNIT_DICT.length = 0;
-                        UNIT_DICT.push(...parsed);
+                        parsed.forEach(savedUnit => {
+                            const idx = UNIT_DICT.findIndex(u => u.canonical === savedUnit.canonical);
+                            if (idx >= 0) {
+                                UNIT_DICT[idx] = savedUnit;
+                            } else {
+                                UNIT_DICT.push(savedUnit);
+                            }
+                        });
                     }
                 } catch (e) {
                     console.warn('Could not load saved dictionary:', e);
