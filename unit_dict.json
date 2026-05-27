@@ -526,6 +526,33 @@
         }
     },
     {
+        "canonical": "CALORIE",
+        "SI": 4184,
+        "dimension": "ENERGY",
+        "aliases": ["kcal", "calorie", "calories"],
+        "replacements": {
+            "patriot": [
+                {"singular": "regular marshmallow", "plural": "regular marshmallows", "SI": 96232, "weight": 3, "note": "~23 kcal per 7.5g marshmallow"},
+                {"singular": "jumbo marshmallow", "plural": "jumbo marshmallows", "SI": 376560, "weight": 2, "note": "~90 kcal per 37g jumbo"},
+                {"singular": "s'more", "plural": "s'mores", "SI": 523000, "weight": 2, "note": "~125 kcal per s'more"},
+                {"singular": "Peep", "plural": "Peeps", "SI": 133888, "weight": 1, "note": "~32 kcal per Peep"}
+            ],
+            "texan": [
+                {"singular": "bag of Jet-Puffed marshmallows", "plural": "bags of Jet-Puffed marshmallows", "SI": 2886960, "weight": 2, "note": "~690 kcal per 198g bag"},
+                {"singular": "Texas s'more", "plural": "Texas s'mores", "SI": 2092000, "weight": 2, "note": "Double-decker ~500 kcal"},
+                {"singular": "cubic foot of marshmallow", "plural": "cubic feet of marshmallow", "SI": 100416000, "weight": 1, "note": "~24,000 kcal per cu ft"}
+            ],
+            "academic": [
+                {"singular": "kcal", "plural": "kcal", "SI": 4184, "weight": 3, "note": "1 food calorie = 4184 J"},
+                {"singular": "kilojoule", "plural": "kilojoules", "SI": 1000, "weight": 1, "note": "1 kJ = 239 cal"}
+            ],
+            "apocalypse": [
+                {"singular": "MRE caloric unit", "plural": "MRE caloric units", "SI": 5230000, "weight": 2, "note": "~1250 kcal per MRE"},
+                {"singular": "survival ration day", "plural": "survival ration days", "SI": 8368000, "weight": 1, "note": "~2000 kcal minimum per day"}
+            ]
+        }
+    },
+    {
         "canonical": "LB_FT_TORQUE",
         "SI": 1.35582,
         "dimension": "TORQUE",
