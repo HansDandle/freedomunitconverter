@@ -119,7 +119,8 @@ h3.sec:first-child { margin-top: 0; }
     <li><b>Groceries, gas, electricity:</b> BLS average retail prices (milk before 1995 from USDA retail data). <b>New car:</b> average new-vehicle transaction price.</li>
     <li><b>Rent:</b> Census median gross rent (decennial census + ACS; 1975, 1985, 1995 interpolated). <b>College:</b> College Board / NCES published in-state tuition &amp; fees. <b>Health insurance:</b> KFF Employer Health Benefits Survey, family coverage, total premium; the survey begins in 1999.</li>
     <li><b>Movie ticket:</b> National Association of Theatre Owners average. <b>Disney:</b> published one-day Magic Kingdom gate prices (2020+ uses a typical date-based price). <b>Rolex:</b> approximate U.S. list prices for the no-date Submariner. <b>NFL:</b> Team Marketing Report average from 1991; earlier years estimated.</li>
-    <li><b>Items marked "Estimate"</b> (birth, flight, dinner, NFL before 1991, computer, phone call, TV) have no single official series; values are representative figures and should be read as rough.</li>
+    <li><b>Cigarettes:</b> average retail price per pack including federal and state taxes (Tax Burden on Tobacco / CDC). <b>Stamps:</b> USPS first-class letter rate in effect for most of the year.</li>
+    <li><b>Items marked "Estimate"</b> (tires, birth, tampons, condoms, toilet paper, haircut, beer, flight, dinner, NFL before 1991, computer, phone call, TV) have no single official series; values are representative figures and should be read as rough.</li>
     <li><b>TV:</b> no official series exists; these are representative prices for a typical mainstream family TV of the era (19–25" color CRT through 2000, ~32" LCD in 2005, 50–55" LED/4K after). Rough estimates.</li>
     <li>All figures are nominal dollars rounded from published series; recent years (esp. 2025) are approximate. Pay is pre-tax.</li>
   </ul>
@@ -141,11 +142,12 @@ const visible = new Set(SERIES.map(s => s.id));
 const BREAD = [0.24,0.36,0.51,0.55,0.70,0.84,0.99,1.05,1.42,1.40,1.95];
 const MILK  = [1.32,1.57,2.16,2.20,2.78,2.48,2.79,3.19,3.42,3.32,4.15];
 const EGGS  = [0.61,0.77,0.84,0.80,1.00,0.86,0.96,1.22,2.47,1.51,4.50];
-const SECTIONS = ["Big costs", "Staples", "Luxuries & experiences", "Tech"];
+const SECTIONS = ["Big costs", "Staples", "Personal & household", "Luxuries & experiences", "Tech"];
 const E = "est", D = "data";
 const ITEMS = [
   { sec: 0, q: D, name: "A 3-bedroom house", what: "Median new home sale price", prices: [23400,39300,64600,84300,122900,133900,169000,240900,296400,336900,410000] },
   { sec: 0, q: D, name: "A year of rent", what: "Median gross rent × 12", prices: [108,170,243,375,447,510,602,728,959,1130,1480].map(v => v * 12) },
+  { sec: 0, q: E, name: "4 new tires", what: "Set of four mid-range passenger tires, installed (estimate)", prices: [120,160,240,260,280,300,340,400,560,620,780] },
   { sec: 0, q: D, name: "A new car", what: "Average new-vehicle price", prices: [3900,5000,7200,11450,15500,20000,24750,28000,33500,40000,49500] },
   { sec: 0, q: D, name: "A year of public college", what: "In-state tuition & fees, 4-year public", prices: [430,600,800,1320,1900,2850,3510,5490,9410,10560,11610] },
   { sec: 0, q: D, name: "A year of family health insurance", what: "Total employer-plan premium (employer + worker share), from 2000", prices: [null,null,null,null,null,null,6438,10880,17545,21342,26993] },
@@ -158,20 +160,27 @@ const ITEMS = [
   { sec: 1, q: D, name: "A dozen eggs", what: "Grade A large, retail", prices: EGGS },
   { sec: 1, q: D, name: "Breakfast basket", what: "Bread + gallon of milk + dozen eggs", prices: BREAD.map((b, i) => +(b + MILK[i] + EGGS[i]).toFixed(2)) },
   { sec: 1, q: D, name: "A pound of coffee", what: "Ground roast coffee, retail", prices: [0.91,1.33,2.90,2.70,2.94,3.65,3.48,3.10,4.25,4.45,7.80] },
-  { sec: 1, q: D, name: "A pound of bananas", what: "Retail", prices: [0.17,0.22,0.34,0.34,0.43,0.46,0.50,0.49,0.58,0.58,0.64] },
+  { sec: 1, q: D, name: "10 lb of bananas", what: "Retail price × 10", prices: [1.7,2.2,3.4,3.4,4.3,4.6,5.0,4.9,5.8,5.8,6.4] },
   { sec: 1, q: D, name: "A month of electricity", what: "500 kWh at the average residential rate", prices: [11,17.5,27,37,39,42,41,47,63,66,87] },
 
-  { sec: 2, q: D, name: "1 oz of gold", what: "Annual average spot price", prices: [36,161,615,317,384,384,279,445,1160,1770,3450] },
-  { sec: 2, q: E, name: "Round-trip flight, Chicago ↔ New York", what: "Average coach fare (pre-1993 estimated from fare tables)", prices: [100,135,230,220,280,260,300,230,250,190,230] },
-  { sec: 2, q: D, name: "A movie ticket", what: "Average U.S. ticket price", prices: [1.55,2.05,2.69,3.55,4.23,4.35,5.39,6.41,8.43,9.20,11.30] },
-  { sec: 2, q: E, name: "Dinner for two", what: "Mid-range sit-down restaurant, with tip (estimate)", prices: [10,14,20,26,32,36,42,48,60,68,90] },
-  { sec: 2, q: D, name: "Disney World for a family of 4", what: "Four 1-day Magic Kingdom tickets (park opened 1971)", prices: [null,6,10,18,31,37,48,63,105,122,150].map(v => v == null ? null : v * 4) },
-  { sec: 2, q: D, name: "A Rolex Submariner", what: "Approximate list price, no-date model", prices: [210,350,900,1150,1700,2500,3500,4400,7500,8100,10250] },
-  { sec: 2, q: E, name: "An NFL game ticket", what: "Average ticket price (pre-1991 estimated)", prices: [6.75,8.5,11,15.5,22,33.5,49.35,59.05,85.83,100.88,125] },
+  { sec: 2, q: E, name: "A box of tampons", what: "36-count box, name brand (estimate)", prices: [1.50,1.90,2.60,3.10,3.80,4.30,5.00,5.50,7.00,7.50,9.00] },
+  { sec: 2, q: E, name: "A box of condoms", what: "12-pack, name brand (estimate)", prices: [3.00,3.75,4.80,5.50,7.00,8.00,9.00,10.00,11.50,12.50,14.00] },
+  { sec: 2, q: E, name: "12 rolls of toilet paper", what: "Name-brand multipack (estimate; rolls have also shrunk)", prices: [1.80,2.50,3.30,3.80,4.50,5.20,6.00,6.80,8.50,10.00,13.00] },
+  { sec: 2, q: E, name: "A men's haircut", what: "Neighborhood barber, before tip (estimate)", prices: [2.25,3.25,5,7,9,11,13,15,20,25,32] },
+  { sec: 2, q: E, name: "A six-pack of beer", what: "Domestic, 12 oz cans (estimate)", prices: [1.30,1.85,2.50,3.00,3.60,4.00,4.50,5.50,7.50,8.50,10.50] },
+  { sec: 2, q: D, name: "A pack of cigarettes", what: "Average retail price including taxes", prices: [0.38,0.53,0.63,1.05,1.50,1.85,2.95,4.10,6.50,8.00,9.00] },
+  { sec: 2, q: D, name: "A book of 20 stamps", what: "First-class postage rate × 20", prices: [0.06,0.10,0.15,0.22,0.25,0.32,0.33,0.37,0.49,0.55,0.78].map(v => +(v * 20).toFixed(2)) },
+  { sec: 3, q: D, name: "1 oz of gold", what: "Annual average spot price", prices: [36,161,615,317,384,384,279,445,1160,1770,3450] },
+  { sec: 3, q: E, name: "Round-trip flight, Chicago ↔ New York", what: "Average coach fare (pre-1993 estimated from fare tables)", prices: [100,135,230,220,280,260,300,230,250,190,230] },
+  { sec: 3, q: D, name: "A movie ticket", what: "Average U.S. ticket price", prices: [1.55,2.05,2.69,3.55,4.23,4.35,5.39,6.41,8.43,9.20,11.30] },
+  { sec: 3, q: E, name: "Dinner for two", what: "Mid-range sit-down restaurant, with tip (estimate)", prices: [10,14,20,26,32,36,42,48,60,68,90] },
+  { sec: 3, q: D, name: "Disney World for a family of 4", what: "Four 1-day Magic Kingdom tickets (park opened 1971)", prices: [null,6,10,18,31,37,48,63,105,122,150].map(v => v == null ? null : v * 4) },
+  { sec: 3, q: D, name: "A Rolex Submariner", what: "Approximate list price, no-date model", prices: [210,350,900,1150,1700,2500,3500,4400,7500,8100,10250] },
+  { sec: 3, q: E, name: "An NFL game ticket", what: "Average ticket price (pre-1991 estimated)", prices: [6.75,8.5,11,15.5,22,33.5,49.35,59.05,85.83,100.88,125] },
 
-  { sec: 3, q: E, name: "A TV", what: "Typical mainstream family TV (estimate)", prices: [450,400,450,400,400,350,350,900,500,450,400] },
-  { sec: 3, q: E, name: "A home computer", what: "Typical desktop PC (from 1985, estimate)", prices: [null,null,null,2500,2500,2000,1500,900,700,700,750] },
-  { sec: 3, q: E, name: "A 10-minute coast-to-coast call", what: "Daytime long-distance rate; free with cell plans since ~2010", prices: [3.80,3.70,4.00,3.50,2.50,2.00,1.00,0.50,0,0,0] },
+  { sec: 4, q: E, name: "A TV", what: "Typical mainstream family TV (estimate)", prices: [450,400,450,400,400,350,350,900,500,450,400] },
+  { sec: 4, q: E, name: "A home computer", what: "Typical desktop PC (from 1985, estimate)", prices: [null,null,null,2500,2500,2000,1500,900,700,700,750] },
+  { sec: 4, q: E, name: "A 10-minute coast-to-coast call", what: "Daytime long-distance rate; free with cell plans since ~2010", prices: [3.80,3.70,4.00,3.50,2.50,2.00,1.00,0.50,0,0,0] },
 ];
 
 const fmtHrs = h => h >= 100 ? Math.round(h).toLocaleString() : h >= 10 ? h.toFixed(0) : h.toFixed(1);
